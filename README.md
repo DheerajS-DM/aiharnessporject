@@ -1,297 +1,249 @@
 <div align="center">
 
-# 🌐 AgentVerse
-### *An Intelligent Multi-Agent AI Collaboration & Workflow Orchestration Platform*
+# AgentVerse Pro
+### *Enterprise Multi-Agent AI Orchestration, MCP Tool Protocol and Empirical Benchmarking Engine*
 
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/DheerajS-DM/aiharnessporject)
 [![Python Version](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
 [![React Version](https://img.shields.io/badge/React-18.x-61DAFB?style=flat-square&logo=react&logoColor=black)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-5.x-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Flask](https://img.shields.io/badge/Backend-Flask%203.x-000000?style=flat-square&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
-[![Groq API](https://img.shields.io/badge/LLM%20Engine-Groq%20API-F55036?style=flat-square)](https://groq.com/)
-[![Google GenAI](https://img.shields.io/badge/Reviewer-Google%20GenAI-4285F4?style=flat-square&logo=google&logoColor=white)](https://ai.google.dev/)
+[![Groq API](https://img.shields.io/badge/LLM%20Engine-Groq%20Ultra--Fast-F55036?style=flat-square)](https://groq.com/)
+[![Google Gemini](https://img.shields.io/badge/Evaluator-Gemini%20Flash-4285F4?style=flat-square&logo=google&logoColor=white)](https://ai.google.dev/)
+[![Render](https://img.shields.io/badge/Deploy-Render-46E3B7?style=flat-square&logo=render&logoColor=white)](https://render.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
 
 <p align="center">
-  <b>Visual Workflow Canvas</b> • <b>Multi-Agent Debate & Orchestration</b> • <b>Centralized Shared Memory</b> • <b>Real-Time SSE Telemetry</b>
+  <b>Directed Acyclic Graph (DAG) Execution</b> | <b>Model Context Protocol (MCP) Tools</b> | <b>Human-In-The-Loop (HITL) Governance</b> | <b>Empirical Latency and TTFT Benchmarks</b>
 </p>
 
 </div>
 
 ---
 
-## 📖 Table of Contents
+## Problem Statement: Scaling Collaborative AI Workflows
 
-- [Executive Summary](#-executive-summary)
-- [System Architecture](#-system-architecture)
-- [Key Features](#-key-features)
-- [Multi-Agent Collaboration Modes](#-multi-agent-collaboration-modes)
-- [Agent Archetypes & Roles](#-agent-archetypes--roles)
-- [Technology Stack](#-technology-stack)
-- [Directory Structure](#-directory-structure)
-- [Installation & Getting Started](#-installation--getting-started)
-  - [Prerequisites](#prerequisites)
-  - [1. Backend Setup (Flask)](#1-backend-setup-flask)
-  - [2. Frontend Setup (React + Vite)](#2-frontend-setup-react--vite)
-- [User Walkthrough & Interaction Guide](#-user-walkthrough--interaction-guide)
-- [Resilience, Rate-Limiting & JSON Extraction](#-resilience-rate-limiting--json-extraction)
-- [Academic References (APA 7th Edition)](#-academic-references-apa-7th-edition)
+Monolithic Large Language Models often face reliability bottlenecks in enterprise workflows where prompt chains fail to maintain long-term state, cannot safely invoke external tools, or lack compliance checkpoints.
+
+**AgentVerse Pro** addresses this by decomposing complex objectives into **modular, autonomous agent clusters**. Agents specialize in distinct cognitive roles (Market Analysts, Quantitative Modelers, Software Developers, QA Verifiers, and Risk Officers), exchange structured context through a shared blackboard memory bus, invoke tools via the **Model Context Protocol (MCP)**, enforce **Human-In-The-Loop (HITL)** governance, and benchmark every run quantitatively against latency, cost, and accuracy SLAs.
 
 ---
 
-## 📝 Executive Summary
+## System Architecture and Topology
 
-**AgentVerse** is a full-stack, agentic AI platform engineered to build, simulate, and observe collaborative teams of specialized AI agents. Traditional AI applications typically funnel complex reasoning into a single prompt on a monolithic model. AgentVerse instead models complex workflows as a **distributed multi-agent system**, where specialized agents (e.g., *Software Architects*, *Senior Developers*, *QA Engineers*, and *Brand Editors*) cooperate under structured execution topologies.
-
-Key platform highlights include:
-1. **Interactive Visual Canvas**: Drag-and-drop node graph builder with cubic Bezier SVG routing, port snap-connecting, and node parameter inspection.
-2. **High-Speed Execution Pipeline**: Powered by **Groq** for ultra-low latency sub-second token generation and **Google Gemini** for final verification auditing.
-3. **Structured Communication**: Centralized shared memory bus and JSON output schemas ensuring predictable inter-agent data exchange.
-4. **Live Process Observability**: Server-Sent Events (SSE) stream internal agent thoughts, actions, telemetry metrics, and cost estimations in real time.
-
----
-
-## 🏛 System Architecture
-
-The diagram below illustrates the end-to-end data flow between the user interface, the Flask orchestration engine, the LLM providers, and the telemetry monitoring stream:
+AgentVerse resolves user workflows into a **Directed Acyclic Graph (DAG)**, computing topological execution levels and streaming state transitions over Server-Sent Events (SSE):
 
 ```mermaid
-sequenceDiagram
-    autonumber
-    actor User as Developer / User
-    participant Canvas as React Canvas UI
-    participant Server as Flask Backend (SSE)
-    participant Orchestrator as Agent Orchestrator
-    participant Memory as Central Shared Memory
-    participant Groq as Groq API (Qwen 27B)
-    participant Gemini as Google GenAI Reviewer
-
-    User->>Canvas: Configure Nodes & Click "Run Workflow"
-    Canvas->>Server: POST /api/run (Topology, Nodes, Task, Keys)
-    Server->>Orchestrator: Initialize Pipeline & Resolve DAG
-    
-    loop For Each Node / Debate Turn
-        Orchestrator->>Memory: Pull context & previous agent outputs
-        Orchestrator->>Groq: Query LLM with strict JSON schema
-        Groq-->>Orchestrator: Return parsed response & usage tokens
-        Orchestrator->>Memory: Update shared state dictionary
-        Orchestrator-->>Server: Yield progress event
-        Server-->>Canvas: Stream SSE event (Thoughts, Action, Telemetry)
+flowchart TD
+    subgraph UI ["Frontend - React 18 and Glassmorphic Canvas"]
+        A["Feature Palette (Drag and Drop)"] --> B["Manipulatable Canvas"]
+        B --> C["Benchmark Lab and Observability"]
+        D["HITL Interceptor Modal"]
     end
 
-    Orchestrator->>Gemini: Submit full conversation history for audit
-    Gemini-->>Orchestrator: Return comprehensive review & verdict
-    Orchestrator-->>Server: Yield final complete event
-    Server-->>Canvas: Render final state, stats & review summary
+    subgraph Core ["Flask 3.x Orchestration Engine"]
+        E["DAG Resolver and Scheduler"]
+        F["Shared Blackboard Memory"]
+        G["HITL Event Registry"]
+        H["Scorecard and Telemetry Engine"]
+    end
+
+    subgraph MCP ["Model Context Protocol (MCP) Tool Registry"]
+        T1["Live Web Search"]
+        T2["Python Sandbox Interpreter"]
+        T3["Financial Metric Calculator (CAGR, Sharpe)"]
+        T4["SQL Query Engine"]
+    end
+
+    subgraph LLM ["Dual-Engine Inference Cluster"]
+        L1["Groq API (Qwen 3.6 27B) - Low TTFT"]
+        L2["Google Gemini Flash - LLM-as-a-Judge"]
+    end
+
+    B -- "POST /api/run" --> E
+    E --> F
+    E -- "Execute Tool" --> MCP
+    E -- "Query JSON Schema" --> L1
+    E -- "Pause / Await Approval" --> G
+    G -. "POST /api/approval/:id" .-> D
+    E -- "Benchmark Audit" --> L2
+    E -- "SSE Stream (node_progress, hitl, complete)" --> C
 ```
 
 ---
 
-## ✨ Key Features
+## Core Platform Capabilities
 
-### 1. Visual Flow Canvas
-* **Minimalist Blueprint Aesthetic**: Designed using high-contrast matte lines, sharp 1px borders, subtle dot grids, and distinct status color indicators (Green for active, Cyan for input, Orange for processing).
-* **Dynamic Bezier Connections**: Real-time cubic Bezier curve rendering with animated SVG stroke-dasharray directional flows.
-* **Interactive Node Inspector**: Click on any node to customize its role, prompt instructions, LLM model override, and temperature slider.
+### 1. Manipulatable Canvas and Capability Board
+* **Interactive Capability Palette**: Drag modular capability modules (Chain of Thought Reasoning, Self-Reflection, MCP Live Web Search, Python Sandbox, Financial Calculator, SQL Query, Human-In-The-Loop Checkpoint, Latency SLA Monitor) directly onto agent nodes.
+* **Canvas Manipulation**: Zoom controls (45% to 180%), pan with grid snapping, viewport centering, and right-click context menu (Add Agent, Add HITL Gate, Add Evaluator, Reset View).
+* **Bezier Connection Routing**: Real-time cubic Bezier curves with directional pulse animations during execution.
+* **Port Snapping and Disconnect**: Interactive connection creation between ports and one-click connection deletion.
 
-### 2. Multi-Mode Agent Orchestration
-* Supports multiple execution topologies: **Sequential Pipeline**, **Iterative Debate & Refinement**, **Orchestrator-Worker**, and **Parallel Creative Swarm**.
-* Built-in debate loop limiter capped at a maximum of **3 turns** to prevent runaway token usage.
+### 2. Model Context Protocol (MCP) Tool Registry
+Modular tools adhering to Model Context Protocol interface conventions:
 
-### 3. Dual-Engine LLM Infrastructure
-* **Generation Engine**: Harnesses Groq API models (e.g., `qwen/qwen3.6-27b`) at temperature `0.0` for predictable, deterministic, and rapid responses.
-* **Audit Engine**: Employs Google GenAI (`gemini-3.5-flash`) to perform final quality evaluation and assertion checks.
-* **High-Fidelity Offline Simulator**: Automatically simulates realistic multi-agent execution if no API keys are provided.
+| Tool Name | Type | Description | Target Use Case |
+| :--- | :--- | :--- | :--- |
+| `web_search` | Real-time Search | Queries market data, company news, and technical specifications | Market research and context retrieval |
+| `code_interpreter` | Isolated Sandbox | Evaluates dynamic Python scripts with math and numerical processing | Algorithmic testing and data analysis |
+| `financial_calculator` | Quantitative Math | Computes CAGR, Sharpe Ratio, SIP return, and volatility metrics | Risk modeling and capital allocation |
+| `sql_query` | Relational Store | Queries in-memory transaction logs and execution records | Ledger reconciliation and record retrieval |
 
-### 4. Comprehensive Telemetry & Observability
-* **Console Stream**: Real-time terminal log showing agent transitions, token counts, and elapsed latency.
-* **Shared Memory Inspector**: Live JSON tree showing accumulated shared context.
-* **Thought Stream**: Tabbed inspection of internal reasoning chains (`thoughts` field) generated by each agent prior to taking action.
-* **Resource Graphs**: Live charts monitoring active memory usage, token consumption, and cost estimates.
+### 3. Human-In-The-Loop (HITL) Governance Checkpoints
+* **Controlled Execution Halts**: Pipelines pause when entering an `approval` checkpoint before downstream side-effects occur.
+* **Thread Synchronization**: The backend engine pauses execution using thread-safe `threading.Event` synchronization while preserving connection state.
+* **Interactive Interceptor**: The browser surfaces a governance modal displaying the proposed payload, allowing human operators to Approve, Reject, or Inject Feedback Guidance to resume execution.
 
----
-
-## 🔄 Multi-Agent Collaboration Modes
-
-| Mode | Description | Typical Use Case |
-| :--- | :--- | :--- |
-| **Sequential** | Agents execute sequentially in topological order. Outputs of earlier nodes flow directly into subsequent agents via shared memory. | Automated Document Pipelines, Multi-step Data Transformations. |
-| **Refinement (Debate)** | Two specialized agents (e.g., Developer & QA Tester) iterate and critique work back and forth in a structured feedback loop (capped at 3 turns). | Code Generation & Unit Testing, Essay Drafting & Peer Review. |
-| **Orchestrator-Worker** | A central coordinator decomposes a user task into sub-tasks, delegates to worker agents, and aggregates findings into a unified report. | Complex Research Synthesis, Competitive Market Analysis. |
-| **Parallel** | Multiple independent agents execute simultaneously across different angles before feeding into a final review aggregator. | Creative Ad Slogan Brainstorming, Multi-variant Copywriting. |
-
----
-
-## 🤖 Agent Archetypes & Roles
-
-```
-[User Input Node] ──> [Software Architect] ──> [Senior Python Dev] ──> [QA Engineer] ──> [Final Assembly]
-      (Input)               (Research)                (Coding)             (Testing)          (Output)
-```
-
-1. **Input Agent (`input`)**: Ingests user requirements, sanitizes parameters, and initializes the root context in shared memory.
-2. **Research / Architect Agent (`research`)**: Analyzes problem specifications, plans data structures, and creates technical blueprints.
-3. **Coding Agent (`coding`)**: Writes production-ready code matching the architect's specifications.
-4. **Testing & QA Agent (`testing`)**: Reviews generated code, produces mock test cases, and executes assertions to verify logic.
-5. **Output / Review Agent (`output`)**: Compiles all artifacts, checks constraints, and prepares final deliverables.
+### 4. Empirical Benchmarking and Observability Lab
+* **Quantitative Scorecard**: Generates an automated composite benchmark score (0-100) and letter grade (A+, A, B+) based on 5 dimensions:
+  1. *Reasoning and Accuracy* (Chain-of-Thought adherence)
+  2. *MCP Tool Precision* (Parameter validity and execution consistency)
+  3. *Latency SLA Efficiency* (Time-to-first-token and execution time)
+  4. *Token Cost Optimization* (Cost per query in USD)
+  5. *Multi-Agent Consensus* (Alignment across conversation rounds)
+* **Real-Time Telemetry Dashboard**:
+  - **Latency Waterfall Chart**: Visualizes per-agent TTFT (Time to first token) versus total generation latency.
+  - **Token Velocity Tracking**: Telemetry views for token generation across topological stages.
+  - **Audit Logs and Blackboard Explorer**: Interactive JSON state viewer for live shared memory.
+* **Benchmark Report Export**: Export benchmark records in JSON or Markdown format for archiving and evaluation.
 
 ---
 
-## 🛠 Technology Stack
-
-### Frontend
-* **React 18**: Component-driven reactive UI architecture.
-* **Vite 5**: Next-generation lightning-fast frontend tooling and development server.
-* **Pure CSS3 Design System**: Custom **Matte Minimalist Lines** styling without heavy UI framework bloat.
-* **Lucide Icons**: Crisp, uniform iconography for developer tools and control panels.
-
-### Backend
-* **Python 3.11+**: Modern async-capable Python runtime.
-* **Flask 3.x**: Lightweight WSGI microframework for orchestrating pipelines and serving endpoints.
-* **Server-Sent Events (SSE)**: Native HTTP streaming (`text/event-stream`) for zero-dependency real-time client communication.
-* **Requests HTTP Client**: Custom REST client with automated retry and exponential backoff.
-
-### AI Providers & Validation
-* **Groq Cloud API**: High-throughput inference for core agent reasoning.
-* **Google GenAI API**: Multi-modal flagship reviewer.
-* **JSON Schema Enforcement**: Automatic extraction of `{ ... }` blocks to prevent markdown parse failures.
-
----
-
-## 📁 Directory Structure
-
-```text
-tanshika/
-├── backend/
-│   ├── main.py               # Flask application server, CORS config, & SSE routes
-│   ├── orchestrator.py       # Multi-agent topology engine, Groq/Gemini client, retry logic
-│   └── requirements.txt      # Python dependencies (Flask, requests, etc.)
-├── frontend/
-│   ├── index.html            # Application entry HTML with Google Fonts
-│   ├── package.json          # Node dependencies and build scripts
-│   ├── vite.config.js        # Vite build and proxy configuration
-│   └── src/
-│       ├── main.jsx          # React DOM bootstrap
-│       ├── App.jsx           # Master state manager & SSE connection listener
-│       ├── App.css           # Matte minimalist design tokens, dark/light themes
-│       └── components/
-│           ├── Canvas.jsx    # SVG drag-and-drop workflow canvas
-│           ├── Monitor.jsx   # Tabbed live log stream, shared memory, and telemetry
-│           └── Sidebar.jsx   # Preset selection, execution controls, and node inspector
-├── .gitignore                # Production ignore rules (node_modules, venv, logs)
-└── README.md                 # Complete project documentation
-```
-
----
-
-## 🚀 Installation & Getting Started
+## Quickstart and Local Setup
 
 ### Prerequisites
-* **Python 3.11** or higher installed.
-* **Node.js 18+** and **npm** installed.
+* **Python**: 3.10+ (tested on Python 3.11 and 3.14)
+* **Node.js**: 18+ (tested on Node 20+)
+* **npm**: 9+
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/your-username/agentverse.git
+cd agentverse
+```
+
+### 2. Backend Setup
+```bash
+# Create and activate virtual environment
+python -m venv venv
+
+# On Windows (PowerShell):
+.\venv\bin\Activate.ps1
+# On Linux/macOS:
+source venv/bin/activate
+
+# Install backend dependencies
+pip install -r backend/requirements.txt
+```
+
+### 3. Frontend Setup
+```bash
+cd frontend
+npm install
+npm run build
+cd ..
+```
+
+### 4. Run the Platform
+
+#### Development Mode (Concurrent Vite and Flask)
+```bash
+# Terminal 1 - Start Flask backend
+python backend/main.py
+
+# Terminal 2 - Start Vite frontend
+cd frontend
+npm run dev
+```
+Open `http://localhost:3000` in the browser.
+
+#### Production Mode (Unified Single-Port Web Service)
+```bash
+# Start backend (serves built React dist from frontend/dist)
+python backend/main.py
+```
+Open `http://localhost:8000` in the browser.
 
 ---
 
-### 1. Backend Setup (Flask)
+## Running the Automated Test Suite
 
-1. Open a terminal at the project root:
-   ```bash
-   cd c:/Users/Dheeraj\ Sutram/Documents/projects/AI/tanshika
-   ```
+An automated test suite verifies MCP tools, DAG execution, HITL approval routing, and API endpoints:
 
-2. Create and activate a Python virtual environment:
-   * **Windows (PowerShell)**:
-     ```powershell
-     python -m venv venv
-     .\venv\Scripts\Activate.ps1
-     ```
-   * **Windows (Git Bash / Linux / macOS)**:
+```bash
+# Run tests inside the virtual environment
+.\venv\bin\python.exe -m unittest tests/test_backend.py
+```
+
+Expected output:
+```text
+Ran 6 tests in 0.429s
+
+OK
+```
+
+---
+
+## Deployment to Render
+
+AgentVerse is configured for deployment as a single unified web service on Render.
+
+### Option A: Deploy via render.yaml Blueprint (Recommended)
+1. Push this repository to GitHub.
+2. Log into the Render Dashboard.
+3. Select **New +** -> **Blueprint**.
+4. Connect this repository; Render will automatically detect `render.yaml` and configure the service.
+5. Click **Apply**.
+
+### Option B: Manual Web Service Setup on Render
+1. Select **New +** -> **Web Service**.
+2. Connect your repository.
+3. Configure the settings:
+   - **Environment**: `Python 3`
+   - **Build Command**: 
      ```bash
-     python -m venv venv
-     source venv/bin/activate
+     pip install -r backend/requirements.txt && cd frontend && npm install && npm run build && cd ..
      ```
+   - **Start Command**:
+     ```bash
+     gunicorn --chdir backend main:app
+     ```
+4. Click **Create Web Service**.
 
-3. Install backend dependencies:
-   ```bash
-   pip install -r backend/requirements.txt
-   ```
-
-4. Launch the Flask API server:
-   ```bash
-   python backend/main.py
-   ```
-   *The server starts listening on `http://localhost:8000`.*
+> **Note on Credentials**: API keys can be supplied via environment variables or entered dynamically in the browser settings dialog. If omitted, the platform defaults to **High-Fidelity Sandbox Mode**, allowing reviewers to test complete workflows without third-party credentials.
 
 ---
 
-### 2. Frontend Setup (React + Vite)
+## Repository Directory Structure
 
-1. Open a second terminal window at the project root:
-   ```bash
-   cd frontend
-   ```
-
-2. Install Node dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Start the Vite development server:
-   ```bash
-   npm run dev
-   ```
-   *The web application is accessible at `http://localhost:3000`.*
-
----
-
-## 🖥 User Walkthrough & Interaction Guide
-
-1. **Add API Credentials**:
-   * Click **⚙ API Keys** in the sidebar.
-   * Enter your **Groq API Key** and **Google Gemini API Key**.
-   * Keys are stored securely in browser `localStorage` and sent over local loopback during execution. *(If keys are omitted, the built-in simulator automatically generates mock runs)*.
-2. **Select a Team Preset**:
-   * Click on a preset in the sidebar (e.g., **Software Engineering Team** or **Creative Campaign Team**).
-   * The canvas automatically generates specialized nodes and connects them with SVG curves.
-3. **Customize Graph Nodes**:
-   * Click any node on the canvas to open the **Node Inspector**.
-   * Modify the system prompt, adjust temperature, or assign different model parameters.
-4. **Draw / Remove Connections**:
-   * Click the output port (right side) of an upstream node and drag a connection line to the input port (left side) of a downstream node.
-   * Click on any connection wire to delete it.
-5. **Execute Workflow**:
-   * Enter your task in the **Task Instructions** box (e.g., *"Create a Python CLI tool that parses CSV files and calculates summary statistics"*).
-   * Click **▶ Run Workflow**.
-6. **Inspect Telemetry**:
-   * Monitor real-time progress in the bottom **Process Monitor & Tracing** drawer.
-   * Toggle between **Console Stream**, **Shared Memory**, **Thought Stream**, and **Resource Telemetry**.
+```text
+├── backend/
+│   ├── main.py              # Flask REST and SSE streaming server + static frontend host
+│   ├── orchestrator.py      # DAG execution, topological ordering, telemetry and HITL
+│   ├── tools.py             # Model Context Protocol (MCP) tool registry
+│   └── requirements.txt     # Python production dependencies (Flask, requests, gunicorn)
+├── frontend/
+│   ├── index.html           # HTML5 entry with typography and viewport definitions
+│   ├── package.json         # React 18 and Vite 5 dependencies
+│   ├── vite.config.js       # Vite configuration with /api reverse proxy
+│   └── src/
+│       ├── App.jsx          # Application state, DAG presets and SSE stream parser
+│       ├── App.css          # Design system and layout styles
+│       ├── components/
+│           ├── Canvas.jsx                  # Graph board with zoom, pan, and drag-and-drop
+│           ├── FeaturePalette.jsx          # Capability catalog (CoT, MCP, HITL)
+│           ├── DraggableFeatureCard.jsx    # Capability cards
+│           ├── OutputPanel.jsx             # Benchmark Lab and dialogue tracker
+│           ├── SvgCharts.jsx               # Latency waterfall, scorecards and sparklines
+│           ├── HitlInterceptorModal.jsx    # Human-in-the-loop operator checkpoint modal
+│           └── Sidebar.jsx                 # Presets, node inspector and topology options
+├── tests/
+│   └── test_backend.py      # Automated unittest suite for MCP tools, HITL and API
+├── render.yaml              # Render Blueprint deployment configuration
+├── Procfile                 # Process configuration for cloud hosts
+├── build.sh                 # Unified build script
+└── README.md                # System documentation
+```
 
 ---
-
-## 🛡 Resilience, Rate-Limiting & JSON Extraction
-
-AgentVerse incorporates several defensive engineering mechanisms to ensure resilient runs:
-
-* **Automatic 429 Backoff Loop**: When operating on free/limited API tiers (e.g. 8,000 TPM limit on Groq), the engine dynamically extracts the `try again in X.XXs` parameter from error bodies, pauses execution, and automatically retries up to 3 times before failing.
-* **Defensive JSON Extraction**: Rather than relying strictly on raw LLM output strings, the backend utilizes custom parser logic to strip markdown code blocks (````json ... ````) and isolate the substring from the initial `{` to the terminal `}`.
-* **Token Guard (`max_tokens`)**: All completion requests specify a high completion token ceiling (`max_tokens: 4096`) to prevent payloads from truncating mid-document before closing JSON braces.
-
----
-
-## 📚 Academic References (APA 7th Edition)
-
-1. **Russell, S., & Norvig, P.** (2021). *Artificial Intelligence: A Modern Approach* (4th ed.). Pearson.
-2. **Wooldridge, M.** (2009). *An Introduction to MultiAgent Systems* (2nd ed.). John Wiley & Sons.
-3. **Wu, Q., Bansal, G., Zhang, J., Wu, Y., Li, B., Zhu, E., Jiang, L., Zhang, X., Zhang, S., Awadallah, A. H., White, R. W., Burger, D., & Wang, C.** (2024). AutoGen: Enabling next-generation LLM applications via multi-agent conversation. *Proceedings of the Conference on Language Modeling (COLM 2024)*.
-4. **Hong, S., Zhuge, M., Chen, J., Zheng, X., Cheng, Y., Wang, J., Zhang, C., Wang, Z., Yau, S. K. S., Lin, Z., Zhou, L., Ran, C., Xiao, L., Wu, C., & Schmidhuber, J.** (2024). MetaGPT: Meta programming for a multi-agent collaborative framework. *Proceedings of the International Conference on Learning Representations (ICLR 2024)*.
-5. **Qian, C., Liu, W., Hong, H., et al.** (2024). ChatDev: Communicative agents for software development. *Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (ACL 2024)*.
-6. **Guo, T., Chen, X., Wang, Y., Chang, R., Pei, S., Chawla, N. V., Wiest, O., & Zhang, X.** (2024). Large language model based multi-agents: A survey of progress and challenges. *Proceedings of IJCAI 2024*.
-7. **Li, X., Wang, S., Zeng, S., Wu, Y., & Yang, Y.** (2024). A survey on LLM-based multi-agent systems: Workflow, infrastructure, and challenges. *Vicinagearth*, 1, Article 9. Springer Nature.
-8. **Li, G., Hammoud, H., Itani, H., Khizbullin, D., & Ghanem, B.** (2025). LLM-based multi-agent systems for software engineering: Literature review, vision, and the road ahead. *ACM Transactions on Software Engineering and Methodology (TOSEM)*.
-9. **Chen, Y., Arkin, J., Zhang, Y., Roy, N., & Fan, C.** (2024). Scalable multi-robot collaboration with large language models: Centralized or decentralized systems? *Proceedings of the IEEE International Conference on Robotics and Automation (ICRA)*.
-10. **Vaswani, A., Shazeer, N., Parmar, N., et al.** (2017). Attention is all you need. *Advances in Neural Information Processing Systems (NeurIPS)*, 30, 5998–6008.
-
----
-
-<div align="center">
-  <sub>Built with precision for agentic AI workflows. Distributed under the MIT License.</sub>
-</div>

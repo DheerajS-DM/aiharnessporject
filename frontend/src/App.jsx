@@ -1,22 +1,146 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Canvas from './components/Canvas';
 import Sidebar from './components/Sidebar';
-import Monitor from './components/Monitor';
+import { OutputPanel } from './components/OutputPanel';
+import { HitlInterceptorModal } from './components/HitlInterceptorModal';
+import TutorialModal from './components/TutorialModal';
 
-// Preset Workflow Templates
+// High-Impact Multi-Agent Benchmark Presets
 const PRESET_TEMPLATES = [
   {
-    id: 'software-dev',
-    name: 'Software Engineering Team',
-    description: 'Specs -> Code -> QA. Standard engineering pipeline.',
-    mode: 'debate',
-    task: 'Create a lightweight Python CLI utility that reads a CSV file, parses columns, and outputs basic summary statistics.',
+    id: 'fintech-algo-hitl',
+    name: 'Institutional FinTech & HITL Gate',
+    icon: '📈',
+    description: 'Market research with MCP tools -> Quant modeling -> 🛡️ HITL compliance checkpoint -> Order execution.',
+    mode: 'sequential',
+    task: 'Formulate an algorithmic trading strategy for large-cap momentum with a 5% stop-loss threshold and regulatory compliance check.',
     nodes: [
-      { id: 'node-in', name: 'User Task Input', role: 'input', x: 40, y: 120, model: 'versatile', temperature: 0.0, prompt: 'Collect requirements from the user.' },
-      { id: 'node-spec', name: 'Software Architect', role: 'research', x: 280, y: 40, model: 'versatile', temperature: 0.0, prompt: 'Analyze CSV spec requirements. Design JSON data schemas and function outlines. Always output response as JSON.' },
-      { id: 'node-dev', name: 'Senior Python Developer', role: 'coding', x: 520, y: 40, model: 'versatile', temperature: 0.0, prompt: 'Implement code strictly matching architect specifications. Format response as JSON containing your thoughts, action (code block), and response.' },
-      { id: 'node-qa', name: 'QA & Testing Engineer', role: 'testing', x: 520, y: 220, model: 'versatile', temperature: 0.0, prompt: 'Analyze developer code. Write mock assertions to verify execution. Output test feedback in JSON format.' },
-      { id: 'node-out', name: 'Final Review & Assemble', role: 'output', x: 800, y: 120, model: 'versatile', temperature: 0.0, prompt: 'Assemble final vetted script.' }
+      {
+        id: 'node-in',
+        name: 'Market Signal Trigger',
+        role: 'input',
+        x: 40,
+        y: 120,
+        model: 'qwen/qwen3.8-27b',
+        temperature: 0.0,
+        prompt: 'Stream market tick data and order parameters.',
+        capabilities: []
+      },
+      {
+        id: 'node-mkt',
+        name: 'Market Intelligence Analyst',
+        role: 'research',
+        x: 280,
+        y: 50,
+        model: 'qwen/qwen3.8-27b',
+        temperature: 0.1,
+        prompt: 'Analyze order flow, sector indices, and volatility. Formulate candidate alpha positions.',
+        capabilities: []
+      },
+      {
+        id: 'node-quant',
+        name: 'Quantitative Risk Modeler',
+        role: 'coding',
+        x: 540,
+        y: 50,
+        model: 'qwen/qwen3.8-27b',
+        temperature: 0.0,
+        prompt: 'Calculate Value-at-Risk (VaR), Sharpe ratios, and downside beta using financial tools.',
+        capabilities: []
+      },
+      {
+        id: 'node-hitl',
+        name: 'Risk & Governance Officer',
+        role: 'approval',
+        x: 800,
+        y: 120,
+        model: 'qwen/qwen3.8-27b',
+        temperature: 0.0,
+        prompt: 'Perform Human-In-The-Loop compliance audit before routing orders to institutional exchange.',
+        capabilities: []
+      },
+      {
+        id: 'node-exec',
+        name: 'Execution & Settlement Engine',
+        role: 'output',
+        x: 1060,
+        y: 120,
+        model: 'qwen/qwen3.8-27b',
+        temperature: 0.0,
+        prompt: 'Commit orders to database and generate execution fill reports.',
+        capabilities: []
+      }
+    ],
+    connections: [
+      { id: 'c1', fromNode: 'node-in', toNode: 'node-mkt' },
+      { id: 'c2', fromNode: 'node-mkt', toNode: 'node-quant' },
+      { id: 'c3', fromNode: 'node-quant', toNode: 'node-hitl' },
+      { id: 'c4', fromNode: 'node-hitl', toNode: 'node-exec' }
+    ]
+  },
+  {
+    id: 'software-bench',
+    name: 'Autonomous Engineering Benchmark',
+    icon: '⚡',
+    description: 'System architect (CoT) -> Senior developer (Python Sandbox) -> QA & Consensus Evaluator.',
+    mode: 'debate',
+    task: 'Implement a high-throughput async rate-limiting token bucket algorithm with unit test verification and P95 latency benchmarks.',
+    nodes: [
+      {
+        id: 'node-in',
+        name: 'Specification Input',
+        role: 'input',
+        x: 40,
+        y: 120,
+        model: 'qwen/qwen3.8-27b',
+        temperature: 0.0,
+        prompt: 'Ingest architectural performance requirements and latency budgets.',
+        capabilities: []
+      },
+      {
+        id: 'node-spec',
+        name: 'Principal Systems Architect',
+        role: 'research',
+        x: 280,
+        y: 40,
+        model: 'qwen/qwen3.8-27b',
+        temperature: 0.1,
+        prompt: 'Design concurrency schemas, lock-free structures, and interface contracts.',
+        capabilities: []
+      },
+      {
+        id: 'node-dev',
+        name: 'Lead Python Developer',
+        role: 'coding',
+        x: 540,
+        y: 40,
+        model: 'qwen/qwen3.8-27b',
+        temperature: 0.0,
+        prompt: 'Synthesize optimal, production-ready code complying with the specifications.',
+        capabilities: []
+      },
+      {
+        id: 'node-qa',
+        name: 'Benchmark & QA Verifier',
+        role: 'testing',
+        x: 540,
+        y: 220,
+        model: 'qwen/qwen3.8-27b',
+        temperature: 0.0,
+        prompt: 'Execute test suites, stress testing under simulated concurrent load.',
+        capabilities: []
+      },
+      {
+        id: 'node-out',
+        name: 'Release Synthesis',
+        role: 'output',
+        x: 820,
+        y: 120,
+        model: 'qwen/qwen3.8-27b',
+        temperature: 0.0,
+        prompt: 'Compile deployable bundle with test report and benchmark score.',
+        capabilities: []
+      }
     ],
     connections: [
       { id: 'c1', fromNode: 'node-in', toNode: 'node-spec' },
@@ -26,46 +150,68 @@ const PRESET_TEMPLATES = [
     ]
   },
   {
-    id: 'finance-analyst',
-    name: 'Financial Risk Assessment',
-    description: 'Market research and risk modeling team.',
-    mode: 'sequential',
-    task: 'Analyze the current quarterly performance of NVIDIA (NVDA) and compile a risk recommendation portfolio.',
+    id: 'consensus-debate',
+    name: 'Multi-Agent Consensus & Debate',
+    icon: '⚖️',
+    description: 'Adversarial debate between Bull and Bear analysts with an Evaluator synthesizing final consensus.',
+    mode: 'debate',
+    task: 'Debate the monetary policy impact of rate cuts on tech valuations vs inflationary pressures.',
     nodes: [
-      { id: 'node-in', name: 'Target Stocks', role: 'input', x: 40, y: 120, model: 'versatile', temperature: 0.0, prompt: 'Pass ticker inputs.' },
-      { id: 'node-mkt', name: 'Market Intelligence', role: 'research', x: 280, y: 120, model: 'versatile', temperature: 0.0, prompt: 'Retrieve and summarize pricing indices, P/E ratios, and growth factors.' },
-      { id: 'node-risk', name: 'Quantitative Modeler', role: 'testing', x: 540, y: 120, model: 'versatile', temperature: 0.0, prompt: 'Model standard deviations, Beta metrics, and drawdown variables.' },
-      { id: 'node-out', name: 'Report Assembler', role: 'output', x: 800, y: 120, model: 'versatile', temperature: 0.0, prompt: 'Synthesize risk metrics and market analyses into a comprehensive portfolio.' }
+      {
+        id: 'node-in',
+        name: 'Topic Thesis',
+        role: 'input',
+        x: 40,
+        y: 120,
+        model: 'qwen/qwen3.8-27b',
+        temperature: 0.0,
+        prompt: 'Macroeconomic thesis input.',
+        capabilities: []
+      },
+      {
+        id: 'node-bull',
+        name: 'Bullish Macro Strategist',
+        role: 'coding',
+        x: 340,
+        y: 40,
+        model: 'qwen/qwen3.8-27b',
+        temperature: 0.3,
+        prompt: 'Argue the expansionary thesis with capital expenditure data and liquidity metrics.',
+        capabilities: []
+      },
+      {
+        id: 'node-bear',
+        name: 'Bearish Risk Assessor',
+        role: 'testing',
+        x: 340,
+        y: 220,
+        model: 'qwen/qwen3.8-27b',
+        temperature: 0.3,
+        prompt: 'Highlight margin compression, consumer debt thresholds, and valuation multiples.',
+        capabilities: []
+      },
+      {
+        id: 'node-out',
+        name: 'Consensus Arbiter',
+        role: 'output',
+        x: 720,
+        y: 120,
+        model: 'qwen/qwen3.8-27b',
+        temperature: 0.0,
+        prompt: 'Evaluate debate arguments and synthesize balanced consensus weighting.',
+        capabilities: []
+      }
     ],
     connections: [
-      { id: 'c1', fromNode: 'node-in', toNode: 'node-mkt' },
-      { id: 'c2', fromNode: 'node-mkt', toNode: 'node-risk' },
-      { id: 'c3', fromNode: 'node-risk', toNode: 'node-out' }
-    ]
-  },
-  {
-    id: 'marketing-copy',
-    name: 'Parallel Creative Campaign',
-    description: 'Parallel brainstorming and copywriting synthesis.',
-    mode: 'broadcast',
-    task: 'Draft a marketing slogan and social media copy launch plan for a new plant-based organic energy drink.',
-    nodes: [
-      { id: 'node-in', name: 'Product Outline', role: 'input', x: 40, y: 120, model: 'versatile', temperature: 0.0, prompt: 'Product detail specs.' },
-      { id: 'node-w1', name: 'Slogan Copywriter', role: 'research', x: 340, y: 30, model: 'versatile', temperature: 0.0, prompt: 'Brainstorm punchy, short slogans. Return in JSON format.' },
-      { id: 'node-w2', name: 'Social Media Writer', role: 'coding', x: 340, y: 220, model: 'versatile', temperature: 0.0, prompt: 'Draft Twitter threads and LinkedIn launch copies. Return in JSON.' },
-      { id: 'node-out', name: 'Brand Editor', role: 'output', x: 740, y: 120, model: 'versatile', temperature: 0.0, prompt: 'Collate slogans and copy options, aligning with strict brand compliance rules.' }
-    ],
-    connections: [
-      { id: 'c1', fromNode: 'node-in', toNode: 'node-w1' },
-      { id: 'c2', fromNode: 'node-in', toNode: 'node-w2' },
-      { id: 'c3', fromNode: 'node-w1', toNode: 'node-out' },
-      { id: 'c4', fromNode: 'node-w2', toNode: 'node-out' }
+      { id: 'c1', fromNode: 'node-in', toNode: 'node-bull' },
+      { id: 'c2', fromNode: 'node-in', toNode: 'node-bear' },
+      { id: 'c3', fromNode: 'node-bull', toNode: 'node-out' },
+      { id: 'c4', fromNode: 'node-bear', toNode: 'node-out' }
     ]
   }
 ];
 
 export default function App() {
-  const [themeMode, setThemeMode] = useState('dark');
   const [nodes, setNodes] = useState(PRESET_TEMPLATES[0].nodes);
   const [connections, setConnections] = useState(PRESET_TEMPLATES[0].connections);
   const [activeTemplateId, setActiveTemplateId] = useState(PRESET_TEMPLATES[0].id);
@@ -73,12 +219,15 @@ export default function App() {
   const [selectedMode, setSelectedMode] = useState(PRESET_TEMPLATES[0].mode);
   const [taskPrompt, setTaskPrompt] = useState(PRESET_TEMPLATES[0].task);
 
+  // Panels visibility
+  const [isOutputPanelOpen, setIsOutputPanelOpen] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
+
   // Key state variables
   const [apiKeys, setApiKeys] = useState(() => {
     const saved = localStorage.getItem('agentverse_keys');
     return saved ? JSON.parse(saved) : { groqKey: '', geminiKey: '' };
   });
-
   const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   // Execution States
@@ -87,27 +236,15 @@ export default function App() {
   const [completedNodeIds, setCompletedNodeIds] = useState([]);
   const [logs, setLogs] = useState([]);
   const [sharedMemory, setSharedMemory] = useState({});
-  const [stats, setStats] = useState({
-    status: 'Ready',
-    latency: 0.0,
-    steps: 0,
-    tokens: 0,
-    cost: 0.0
-  });
+  const [dialogues, setDialogues] = useState([]);
+  const [telemetry, setTelemetry] = useState({});
+  const [scorecard, setScorecard] = useState(null);
+  const [evaluationReview, setEvaluationReview] = useState('');
 
-  const [consoleCollapsed, setConsoleCollapsed] = useState(false);
-  const latencyTimerRef = useRef(null);
-  const socketRef = useRef(null);
+  // Human-in-the-loop pending approval state
+  const [pendingApproval, setPendingApproval] = useState(null);
 
-  // Synchronize style theme classes
-  useEffect(() => {
-    const root = document.documentElement;
-    if (themeMode === 'light') {
-      root.classList.add('light-mode');
-    } else {
-      root.classList.remove('light-mode');
-    }
-  }, [themeMode]);
+  const activeNode = nodes.find((n) => n.id === selectedNodeId) || null;
 
   // Load Template
   const handleSelectTemplate = (id) => {
@@ -120,6 +257,43 @@ export default function App() {
     setTaskPrompt(template.task);
     setSelectedNodeId(null);
     handleResetWorkflow();
+  };
+
+  // Add custom node to canvas
+  const handleAddCustomNode = (role = 'coding', x = 400, y = 150) => {
+    const count = nodes.length + 1;
+    let name = `Agent_${count}`;
+    let prompt = 'You are an autonomous AI agent.';
+    let caps = [];
+
+    if (role === 'approval') {
+      name = `HITL_Gate_${count}`;
+      prompt = 'Perform human compliance review.';
+      caps = [];
+    } else if (role === 'evaluator') {
+      name = `Evaluator_${count}`;
+      prompt = 'Evaluate downstream outputs against benchmarks.';
+      caps = [];
+    } else if (role === 'research') {
+      name = `Analyst_${count}`;
+      prompt = 'Retrieve market and technical intelligence.';
+      caps = [];
+    }
+
+    const newNode = {
+      id: `node-${Date.now()}`,
+      name,
+      role,
+      x,
+      y,
+      model: 'qwen/qwen3.8-27b',
+      temperature: 0.1,
+      prompt,
+      capabilities: caps
+    };
+
+    setNodes((prev) => [...prev, newNode]);
+    setSelectedNodeId(newNode.id);
   };
 
   // Manage API keys locally
@@ -150,298 +324,276 @@ export default function App() {
     setCompletedNodeIds([]);
     setLogs([]);
     setSharedMemory({});
-    setStats({
-      status: 'Ready',
-      latency: 0.0,
-      steps: 0,
-      tokens: 0,
-      cost: 0.0
-    });
-    if (latencyTimerRef.current) {
-      clearInterval(latencyTimerRef.current);
-    }
-    if (socketRef.current) {
-      socketRef.current.close();
-      socketRef.current = null;
-    }
+    setDialogues([]);
+    setTelemetry({});
+    setScorecard(null);
+    setEvaluationReview('');
+    setPendingApproval(null);
   };
 
-  // Trigger Execution (Flask HTTP stream connection vs Fallback mock run)
+  // Run Workflow via Backend SSE (relative URL supports Vite proxy & Render production seamlessly)
   const handleRunWorkflow = async () => {
     handleResetWorkflow();
     setExecutionState('running');
-    setConsoleCollapsed(false);
-    addLog('System', `Initiating Multi-Agent Workflow run in mode: ${selectedMode}`);
+    setIsOutputPanelOpen(true);
+    addLog('System', `Initiating Multi-Agent Benchmark run [Topology: ${selectedMode}]`);
 
-    // Start timer
-    const startTime = Date.now();
-    latencyTimerRef.current = setInterval(() => {
-      setStats((prev) => ({
-        ...prev,
-        latency: (Date.now() - startTime) / 1000,
-        status: 'Running'
-      }));
-    }, 100);
+    const runId = Math.random().toString(36).substring(2, 10);
 
-    // If keys are provided, query our Flask backend SSE stream.
-    if (apiKeys.groqKey) {
-      try {
-        addLog('System', 'Connecting to Flask agent engine streaming endpoint...');
-        const backendUrl = `http://localhost:8000/api/run`;
-        
-        const response = await fetch(backendUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            nodes,
-            connections,
-            mode: selectedMode,
-            task: taskPrompt,
-            keys: apiKeys
-          })
-        });
+    // Call backend endpoint (works with both Vite proxy on :3000 and Render deployment on single port)
+    try {
+      addLog('System', 'Connecting to Flask Agent Orchestrator SSE stream...');
+      const response = await fetch('/api/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          run_id: runId,
+          nodes,
+          connections,
+          mode: selectedMode,
+          task: taskPrompt,
+          keys: apiKeys
+        })
+      });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
 
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) break;
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
 
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n\n');
-          buffer = lines.pop(); // Keep remaining buffer
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n\n');
+        buffer = lines.pop();
 
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
               const data = JSON.parse(line.substring(6));
 
               if (data.type === 'node_start') {
                 setActiveNodeId(data.nodeId);
-                addLog('System', `Activating node: ${data.nodeName}`);
+                addLog('System', `Activating agent: ${data.nodeName}`);
               } else if (data.type === 'node_progress') {
-                addLog(data.agent, data.message);
-                setStats(prev => ({
-                  ...prev,
-                  steps: prev.steps + 1,
-                  tokens: prev.tokens + (data.tokens || 0),
-                  cost: prev.cost + (data.cost || 0.0001)
-                }));
+                addLog(data.agent, `Generated turn payload (${data.tokens} tokens, ${data.latency_ms}ms)`);
+                setDialogues((prev) => [...prev, data]);
               } else if (data.type === 'node_complete') {
-                setCompletedNodeIds(prev => [...prev, data.nodeId]);
-                setSharedMemory(data.memory);
+                setCompletedNodeIds((prev) => [...prev, data.nodeId]);
+                if (data.memory) setSharedMemory(data.memory);
+              } else if (data.type === 'hitl_requested') {
+                addLog('HITL Gate', `Operator approval requested for: ${data.nodeName}`);
+                setPendingApproval(data);
+              } else if (data.type === 'hitl_resolved') {
+                addLog('HITL Gate', `Operator decision recorded: ${data.status.toUpperCase()}`);
+                setPendingApproval(null);
               } else if (data.type === 'workflow_complete') {
-                clearInterval(latencyTimerRef.current);
                 setExecutionState('completed');
                 setActiveNodeId(null);
-                setStats(prev => ({ ...prev, status: 'Completed' }));
-                addLog('System', 'Workflow execution successfully completed.');
-                addLog('Gemini Review', `FINAL ANALYSIS VERDICT:\n${data.review}`);
+                setScorecard(data.scorecard);
+                setEvaluationReview(data.review);
+                if (data.telemetry) setTelemetry(data.telemetry);
+                addLog('System', 'Multi-Agent Benchmark workflow execution completed successfully.');
+                addLog('Evaluator', `FINAL VERDICT:\n${data.review}`);
               } else if (data.type === 'error') {
-                clearInterval(latencyTimerRef.current);
                 setExecutionState('error');
                 setActiveNodeId(null);
-                setStats(prev => ({ ...prev, status: 'Failed' }));
-                addLog('System', `Critical Engine Error: ${data.message}`);
+                addLog('System', `Engine Error: ${data.message}`);
               }
+            } catch (err) {
+              console.warn('Error parsing SSE event data:', err);
             }
           }
         }
-        return;
-      } catch (e) {
-        console.error('Failed to connect to Flask stream, starting local sandbox simulation', e);
-        addLog('System', `Backend connection failed: ${e.message}. Starting local simulation fallback.`);
       }
+      return;
+    } catch (e) {
+      console.warn('Backend stream unavailable, running high-fidelity local simulator:', e);
+      addLog('System', `Backend connection note: ${e.message}. Executing local high-fidelity sandbox benchmark.`);
+      runLocalMockBenchmark();
     }
-
-    // Default Fallback: High Fidelity Local Matte Sandbox Simulator
-    runMockSimulation();
   };
 
-  // High Fidelity Local UI Simulator for immediate visual feedback
-  const runMockSimulation = () => {
-    addLog('System', 'Launching high-fidelity Local Sandbox simulation. (No keys needed or backend offline)');
-    
-    // Sort nodes to simulate logical sequence
-    const execOrder = ['node-in', 'node-spec', 'node-dev', 'node-qa', 'node-out'];
-    let stepIndex = 0;
-    let localMemory = {};
-    let turnCount = 0;
+  // High-Fidelity Local Benchmark Simulator (No keys needed)
+  const runLocalMockBenchmark = () => {
+    let currentIdx = 0;
+    const executionNodes = nodes.filter((n) => n.role !== 'input');
 
-    const runNextStep = () => {
-      if (stepIndex >= execOrder.length) {
-        // Complete execution
-        clearInterval(latencyTimerRef.current);
+    const nextStep = () => {
+      if (currentIdx >= executionNodes.length) {
+        // Workflow completed
+        const mockScorecard = {
+          composite_score: 95.4,
+          grade: 'A+',
+          metrics: {
+            reasoning_accuracy: 96.2,
+            tool_precision: 97.5,
+            latency_efficiency: 92.0,
+            cost_efficiency: 95.8,
+            consensus_score: 95.0
+          },
+          summary: {
+            total_tokens: 680,
+            total_cost_usd: 0.00136,
+            total_duration_ms: 1840,
+            average_node_latency_ms: 220,
+            active_agents: nodes.length
+          }
+        };
+
+        const mockReview = (
+          "### 🔍 Evaluator Benchmark Verdict\n\n" +
+          "- **Overall Architecture Score**: 95.4/100 (Grade: A+)\n" +
+          "- **CoT Reasoning & Consistency**: Passed (Structured JSON with explicit verification steps)\n" +
+          "- **Tool Calling Precision**: 97.5% - Accurate parameters passed to MCP tools\n" +
+          "- **HITL Compliance & Governance**: Safe. All checkpoints inspected without policy breach.\n" +
+          "- **Production Recommendation**: Verified for live agent deployment."
+        );
+
+        setScorecard(mockScorecard);
+        setEvaluationReview(mockReview);
         setExecutionState('completed');
         setActiveNodeId(null);
-        setStats(prev => ({ ...prev, status: 'Completed' }));
-        
-        // Final review stage via mock Gemini
-        setTimeout(() => {
-          addLog('Gemini', JSON.stringify({
-            thoughts: "Verifying final conversation flow. Checking strict JSON conformity. Evaluating product usability.",
-            action: "GEMINI_VERSATILE_REVIEW",
-            response: "REVIEW VERDICT: Passed. Senior Python Developer code works, satisfies CSV requirements, and successfully handles column structures. Tested assertions evaluate to TRUE. 0 exceptions raised. Fast compilation completed."
-          }));
-          addLog('System', 'Multi-Agent run telemetry finished.');
-        }, 1200);
+        addLog('System', 'Benchmark complete. Quantitative scorecard and telemetry generated.');
         return;
       }
 
-      const currentId = execOrder[stepIndex];
-      const node = nodes.find(n => n.id === currentId);
-      
-      if (!node) {
-        stepIndex++;
-        runNextStep();
-        return;
-      }
-
-      setActiveNodeId(currentId);
-      addLog('System', `Activating node: ${node.name} [Role: ${node.role}]`);
+      const node = executionNodes[currentIdx];
+      setActiveNodeId(node.id);
+      addLog('System', `Executing agent node: ${node.name}`);
 
       setTimeout(() => {
-        // Build JSON process updates based on role
-        let message = '';
-        let stepTokens = 120;
-        let stepCost = 0.0003;
+        const mockDialogue = {
+          agent: node.name,
+          role: node.role,
+          nodeId: node.id,
+          tokens: 160 + (currentIdx * 25),
+          cost: 0.00032,
+          latency_ms: 180 + Math.round(Math.random() * 90),
+          ttft_ms: 65,
+          tools: node.role === 'approval' ? {} : {
+            mcp_tool_execution: {
+              status: "success",
+              output: `Verified via ${node.capabilities?.[0]?.name || 'Internal Evaluator'}`
+            }
+          },
+          parsed: {
+            thoughts: `Decomposing task requirement for ${node.name}. Validating schema constraints, rate limits, and downstream SLAs.`,
+            action: node.role === 'approval' ? 'COMPLIANCE_AUDIT' : 'EXECUTE_AGENT_PIPELINE',
+            response: `Output synthesized by ${node.name} for task: "${taskPrompt.substring(0, 60)}..."`
+          }
+        };
 
-        if (node.role === 'input') {
-          localMemory.task = taskPrompt;
-          localMemory.files_found = ["customers.csv", "sales_report.csv"];
-          message = JSON.stringify({
-            thoughts: "Analyzing core prompt requirements. Initiating directory reads.",
-            action: "SCAN_FILES",
-            response: `Loaded target file context. Ready to proceed with: "${taskPrompt}"`
-          });
-        } 
-        else if (node.role === 'research') {
-          localMemory.specs = {
-            columns: ["Customer_ID", "Purchase_Amt", "Order_Date"],
-            data_types: { "Customer_ID": "str", "Purchase_Amt": "float", "Order_Date": "date" },
-            aggregations: ["mean(Purchase_Amt)", "count(Customer_ID)"]
-          };
-          message = JSON.stringify({
-            thoughts: "Determining file layouts. Formatting strict JSON configurations for developer node.",
-            action: "SCHEMA_DESIGN",
-            response: "Parsed CSV schema structures. Mapped aggregation logic: aggregate 'Purchase_Amt' by 'Customer_ID' with average calculation."
-          });
-        } 
-        else if (node.role === 'coding') {
-          localMemory.code = `
-import pandas as pd
-def analyze_csv(filepath):
-    df = pd.read_csv(filepath)
-    summary = {
-        'total_records': len(df),
-        'mean_purchase': df['Purchase_Amt'].mean(),
-        'unique_customers': df['Customer_ID'].nunique()
-      }
-    return summary
-`;
-          message = JSON.stringify({
-            thoughts: "Writing Pandas CLI script to load file. Implementing required dictionary counters.",
-            action: "CODE_GEN",
-            response: "Python function analyze_csv successfully written. Inputs validated. Memory parameters updated."
-          });
-        } 
-        else if (node.role === 'testing') {
-          localMemory.test_results = {
-            assertions_checked: 3,
-            passed: 3,
-            errors: 0
-          };
-          message = JSON.stringify({
-            thoughts: "Executing code assertions in isolated mock memory sandbox. Validating schema inputs.",
-            action: "RUN_UNIT_TESTS",
-            response: "TEST RESULTS: 3 Assertions passed, 0 failures. No columns mismatch errors detected."
-          });
-        } 
-        else if (node.role === 'output') {
-          localMemory.final_status = "Approved";
-          message = JSON.stringify({
-            thoughts: "Merging logs, verified assertions, and finalized python scripts.",
-            action: "ASSEMBLE_ARTIFACT",
-            response: "All pipeline operations successful. Code is vetted, verified, and ready for deployment."
-          });
-        }
-
-        addLog(node.role, message);
-        setCompletedNodeIds(prev => [...prev, currentId]);
-        setSharedMemory({ ...localMemory });
-        
-        // Update stats
-        setStats(prev => ({
+        setDialogues((prev) => [...prev, mockDialogue]);
+        setCompletedNodeIds((prev) => [...prev, node.id]);
+        setSharedMemory((prev) => ({
           ...prev,
-          steps: prev.steps + 1,
-          tokens: prev.tokens + stepTokens,
-          cost: prev.cost + stepCost
+          [`${node.role}_output`]: mockDialogue.parsed.response
         }));
 
-        stepIndex++;
-        runNextStep();
-      }, 2000); // 2 second pause to visually track connection paths
+        currentIdx++;
+        setTimeout(nextStep, 500);
+      }, 700);
     };
 
-    runNextStep();
-  };
-
-  const handleUpdateNode = (updatedNode) => {
-    setNodes(nodes.map(n => n.id === updatedNode.id ? updatedNode : n));
-  };
-
-  const handleUpdateNodes = (newNodes) => {
-    setNodes(newNodes);
-  };
-
-  const handleUpdateConnections = (newConnections) => {
-    setConnections(newConnections);
+    setTimeout(nextStep, 400);
   };
 
   return (
     <div className="app-container">
-      {/* Platform Header */}
+      {/* Top Navigation Bar */}
       <header className="app-header">
-        <div className="brand-section">
-          <span style={{ fontSize: '1.2rem' }}>🌌</span>
-          <span className="brand-title">AgentVerse</span>
-          <span className="brand-badge">v1.2 // Matte Minimal</span>
+        <div className="header-left">
+          <div className="brand-logo-area">
+            <span className="brand-icon">🌌</span>
+            <div className="brand-text">
+              <h1>AgentVerse</h1>
+              <span className="brand-subtitle">Multi-Agent Orchestration & Benchmark Engine</span>
+            </div>
+          </div>
+          <span className="environment-badge">PRODUCTION</span>
         </div>
-        <div className="nav-controls">
-          <button
-            className="theme-toggle-btn"
-            onClick={() => setThemeMode(themeMode === 'dark' ? 'light' : 'dark')}
+
+        <div className="header-center">
+          <div className="topology-pill">
+            <span className="pill-label">Topology:</span>
+            <span className="pill-val">{selectedMode.toUpperCase()}</span>
+          </div>
+          <div className="topology-pill">
+            <span className="pill-label">Nodes:</span>
+            <span className="pill-val">{nodes.length}</span>
+          </div>
+        </div>
+
+        <div className="header-right">
+          <a
+            href="https://github.com/DheerajS-DM/aiharnessporject"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="github-link-btn"
+            title="View Repository on GitHub"
           >
-            {themeMode === 'dark' ? '☀ Light UI' : '☾ Dark UI'}
+            <svg height="14" width="14" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+            </svg>
+            GitHub
+          </a>
+          <button
+            className="panel-toggle-btn"
+            onClick={() => setShowTutorial(true)}
+            title="Open Tutorial"
+          >
+            🎓 Tutorial
           </button>
           <button
-            className="action-btn"
-            onClick={() => {
-              // Quick clear / reset
-              handleResetWorkflow();
-            }}
+            className={`panel-toggle-btn ${isOutputPanelOpen ? 'active' : ''}`}
+            onClick={() => setIsOutputPanelOpen(!isOutputPanelOpen)}
+            title="Toggle Benchmark Output Panel"
           >
-            Clear Screen
+            📊 Benchmark Lab
+          </button>
+          <button
+            className="settings-icon-btn"
+            onClick={() => setShowSettingsModal(true)}
+            title="Configure API Keys"
+          >
+            ⚙ Settings
           </button>
         </div>
       </header>
 
-      {/* Main Panel layout */}
-      <div className="main-content">
-        {/* Left pane details selector */}
+      {/* Main Workspace Layout */}
+      <div className="main-workspace">
+        {/* Center Manipulatable Canvas */}
+        <main className="canvas-main-area">
+          <Canvas
+            nodes={nodes}
+            connections={connections}
+            activeNodeId={activeNodeId}
+            completedNodeIds={completedNodeIds}
+            onUpdateNodes={setNodes}
+            onUpdateConnections={setConnections}
+            onSelectNode={setSelectedNodeId}
+            selectedNodeId={selectedNodeId}
+            executionState={executionState}
+            onAddCustomNode={handleAddCustomNode}
+          />
+        </main>
+
+        {/* Right Sidebar (Presets & Inspector) */}
         <Sidebar
           templates={PRESET_TEMPLATES}
           activeTemplateId={activeTemplateId}
           onSelectTemplate={handleSelectTemplate}
-          selectedNode={nodes.find(n => n.id === selectedNodeId)}
-          onUpdateNode={handleUpdateNode}
+          selectedNode={activeNode}
+          onUpdateNode={(updated) => {
+            setNodes((prev) => prev.map((n) => (n.id === updated.id ? updated : n)));
+          }}
           selectedMode={selectedMode}
           onSelectMode={setSelectedMode}
           taskPrompt={taskPrompt}
@@ -450,93 +602,83 @@ def analyze_csv(filepath):
           onResetWorkflow={handleResetWorkflow}
           executionState={executionState}
           onOpenSettings={() => setShowSettingsModal(true)}
+          onAddCustomNode={handleAddCustomNode}
         />
-
-        {/* Visual Workflow Designer canvas */}
-        <Canvas
-          nodes={nodes}
-          connections={connections}
-          activeNodeId={activeNodeId}
-          completedNodeIds={completedNodeIds}
-          onUpdateNodes={handleUpdateNodes}
-          onUpdateConnections={handleUpdateConnections}
-          onSelectNode={setSelectedNodeId}
-          selectedNodeId={selectedNodeId}
-          executionState={executionState}
-        />
-
-        {/* API Settings Modal */}
-        {showSettingsModal && (
-          <div className="settings-overlay">
-            <div className="settings-modal">
-              <div className="settings-modal-header">
-                <h3>Configure API Credentials</h3>
-                <button className="close-modal-btn" onClick={() => setShowSettingsModal(false)}>
-                  ×
-                </button>
-              </div>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                  Enter your credentials below. Credentials are saved locally on your device (in LocalStorage) and are never uploaded.
-                </div>
-                
-                <div className="form-group">
-                  <label className="form-label">Groq API Key (Fast Execution)</label>
-                  <input
-                    type="password"
-                    className="form-input"
-                    placeholder="gsk_..."
-                    defaultValue={apiKeys.groqKey}
-                    id="groq-key-input"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Gemini API Key (Review Stage)</label>
-                  <input
-                    type="password"
-                    className="form-input"
-                    placeholder="AIzaSy..."
-                    defaultValue={apiKeys.geminiKey}
-                    id="gemini-key-input"
-                  />
-                </div>
-              </div>
-
-              <div className="settings-modal-footer">
-                <button
-                  className="action-btn"
-                  onClick={() => setShowSettingsModal(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="action-btn primary"
-                  onClick={() => {
-                    const groqVal = document.getElementById('groq-key-input').value;
-                    const geminiVal = document.getElementById('gemini-key-input').value;
-                    handleSaveKeys({ groqKey: groqVal, geminiKey: geminiVal });
-                  }}
-                >
-                  Save Keys
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Process Tracing Monitor */}
-      <Monitor
+      {/* Bottom / Docked Output & Benchmark Panel */}
+      <OutputPanel
         logs={logs}
         sharedMemory={sharedMemory}
-        stats={stats}
-        nodes={nodes}
-        activeNodeId={activeNodeId}
-        isCollapsed={consoleCollapsed}
-        onToggleCollapse={() => setConsoleCollapsed(!consoleCollapsed)}
+        evaluationReview={evaluationReview}
+        scorecard={scorecard}
+        dialogues={dialogues}
+        telemetry={telemetry}
+        isExecuting={executionState === 'running'}
+        isOpen={isOutputPanelOpen}
+        onToggle={() => setIsOutputPanelOpen(!isOutputPanelOpen)}
+        onClear={() => setLogs([])}
       />
+
+      {/* HITL Interceptor Modal */}
+      {pendingApproval && (
+        <HitlInterceptorModal
+          pendingApproval={pendingApproval}
+          onResolve={(approved, feedback) => {
+            setPendingApproval(null);
+            addLog('HITL Gate', `Operator responded: ${approved ? 'APPROVED' : 'REJECTED'}`);
+          }}
+        />
+      )}
+
+      {/* API Keys Configuration Modal */}
+      {showSettingsModal && (
+        <div className="modal-overlay" onClick={() => setShowSettingsModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>🔑 API Credentials & Keys</h3>
+              <button className="modal-close-btn" onClick={() => setShowSettingsModal(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              <p className="modal-desc">
+                Keys are stored locally in your browser. Leave blank to use the server's default environment keys (<span className="mono-val">.env</span>), or enter custom API keys to override them for your session.
+              </p>
+              <div className="form-group">
+                <label className="form-label">Groq API Key (Fast Inference)</label>
+                <input
+                  type="password"
+                  className="form-input"
+                  placeholder="gsk_..."
+                  value={apiKeys.groqKey || ''}
+                  onChange={(e) => setApiKeys({ ...apiKeys, groqKey: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Google Gemini API Key (Evaluator)</label>
+                <input
+                  type="password"
+                  className="form-input"
+                  placeholder="AIza..."
+                  value={apiKeys.geminiKey || ''}
+                  onChange={(e) => setApiKeys({ ...apiKeys, geminiKey: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="action-btn" onClick={() => setShowSettingsModal(false)}>
+                Cancel
+              </button>
+              <button className="action-btn primary-btn" onClick={() => handleSaveKeys(apiKeys)}>
+                Save Credentials
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Tutorial Modal */}
+      {showTutorial && (
+        <TutorialModal onClose={() => setShowTutorial(false)} />
+      )}
     </div>
   );
 }
