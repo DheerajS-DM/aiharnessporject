@@ -449,8 +449,8 @@ class AgentOrchestrator:
                             "proposed_action": proposed_action
                         }
                         
-                        # Wait for human response (max timeout 120s or proceed automatically if no human after timeout)
-                        user_responded = approval_event.wait(timeout=120.0)
+                        # Wait for human response (30s window; auto-proceeds if unresponded)
+                        user_responded = approval_event.wait(timeout=30.0)
                         decision_record = PENDING_APPROVALS.get(self.run_id, {})
                         
                         if user_responded and decision_record.get("decision") == "rejected":

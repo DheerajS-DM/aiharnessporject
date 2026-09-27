@@ -1,1 +1,2 @@
-web: gunicorn --chdir backend main:app
+web: gunicorn --chdir backend --workers 1 --threads 8 --timeout 120 main:app
+

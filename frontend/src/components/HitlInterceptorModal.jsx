@@ -7,8 +7,12 @@ export const HitlInterceptorModal = ({ pendingApproval, onResolve }) => {
   if (!pendingApproval) return null;
 
   const handleAction = async (approved) => {
-    setSubmitting(true);
+    // Dismiss modal immediately so operator interface is never frozen
+    onResolve(approved, feedback);
+
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
       await fetch(`/api/approval/${pendingApproval.run_id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -16,14 +20,12 @@ export const HitlInterceptorModal = ({ pendingApproval, onResolve }) => {
           approved,
           feedback,
           timestamp: new Date().toISOString()
-        })
+        }),
+        signal: controller.signal
       });
-      onResolve(approved, feedback);
+      clearTimeout(timeoutId);
     } catch (err) {
-      console.error('Failed to submit approval:', err);
-      onResolve(approved, feedback);
-    } finally {
-      setSubmitting(false);
+      console.warn('HITL approval dispatch note:', err);
     }
   };
 
@@ -37,7 +39,23 @@ export const HitlInterceptorModal = ({ pendingApproval, onResolve }) => {
             <span className="hitl-dot-pulse" />
             <span>HUMAN-IN-THE-LOOP CHECKPOINT</span>
           </div>
-          <span className="hitl-run-id">Run ID: {pendingApproval.run_id}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span className="hitl-run-id">Run ID: {pendingApproval.run_id}</span>
+            <button
+              onClick={() => handleAction(true)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#94a3b8',
+                cursor: 'pointer',
+                fontSize: '1.2rem',
+                lineHeight: 1
+              }}
+              title="Dismiss Checkpoint"
+            >
+              ×
+            </button>
+          </div>
         </div>
 
         <div className="hitl-modal-body">
