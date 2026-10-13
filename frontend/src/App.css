@@ -1161,15 +1161,26 @@ body {
   display: flex;
   flex-direction: column;
   z-index: 40;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), height 0.25s ease;
+  transition: height 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
 }
 
-.output-panel-root.closed {
-  transform: translateY(calc(100% - 44px));
+.output-panel-root.mode-collapsed {
+  height: 42px;
+  overflow: hidden;
+  cursor: pointer;
 }
 
-.output-panel-root.maximized {
+.output-panel-root.mode-collapsed:hover {
+  background: rgba(20, 26, 40, 0.98);
+  border-top-color: var(--accent-cyan);
+}
+
+.output-panel-root.mode-standard {
+  height: 380px;
+}
+
+.output-panel-root.mode-fullscreen {
   height: calc(100vh - 56px);
 }
 

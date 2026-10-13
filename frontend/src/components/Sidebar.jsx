@@ -172,31 +172,31 @@ export default function Sidebar({
         <div className="quick-add-grid">
           <button
             className="quick-add-btn"
-            onClick={() => onAddCustomNode && onAddCustomNode('coding')}
+            onClick={() => onAddCustomNode && onAddCustomNode('general')}
             disabled={executionState === 'running'}
           >
-            + Developer
+            + General Agent
           </button>
           <button
             className="quick-add-btn"
-            onClick={() => onAddCustomNode && onAddCustomNode('testing')}
+            onClick={() => onAddCustomNode && onAddCustomNode('critic')}
             disabled={executionState === 'running'}
           >
-            + QA Tester
+            + Critic / Reviewer
           </button>
           <button
             className="quick-add-btn hitl-btn-add"
             onClick={() => onAddCustomNode && onAddCustomNode('approval')}
             disabled={executionState === 'running'}
           >
-            🛡️ HITL Gate
+            🛡️ Human Gate
           </button>
           <button
             className="quick-add-btn"
             onClick={() => onAddCustomNode && onAddCustomNode('evaluator')}
             disabled={executionState === 'running'}
           >
-            🔍 Evaluator
+            ⚖️ Evaluator / Judge
           </button>
         </div>
       </div>
@@ -219,13 +219,15 @@ export default function Sidebar({
                 onChange={(e) => onUpdateNode({ ...selectedNode, role: e.target.value })}
                 disabled={executionState === 'running'}
               >
-                <option value="research">Market / Research Analyst</option>
-                <option value="coding">Software Developer</option>
-                <option value="testing">QA & Validation</option>
+                <option value="general">General Purpose Agent</option>
+                <option value="critic">Critic / Adversarial Reviewer</option>
+                <option value="evaluator">Benchmark Judge / Evaluator</option>
                 <option value="approval">🛡️ Human-In-The-Loop Checkpoint</option>
-                <option value="evaluator">Benchmark Evaluator</option>
+                <option value="research">Research / Knowledge Agent</option>
+                <option value="coding">Code Specialist</option>
+                <option value="testing">QA & Verification</option>
                 <option value="orchestrator">Orchestrator Manager</option>
-                <option value="input">Workflow Trigger</option>
+                <option value="input">Prompt Ingest / Trigger</option>
                 <option value="output">Output Consolidation</option>
               </select>
             </div>

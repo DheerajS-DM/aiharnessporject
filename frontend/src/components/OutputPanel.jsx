@@ -9,12 +9,11 @@ export const OutputPanel = ({
   dialogues = [],
   telemetry = {},
   isExecuting = false,
-  isOpen = true,
-  onToggle = () => {},
+  panelMode = 'standard', // 'collapsed' | 'standard' | 'fullscreen'
+  onSetPanelMode = () => {},
   onClear = () => {}
 }) => {
   const [activeTab, setActiveTab] = useState('dialogues');
-  const [isExpanded, setIsExpanded] = useState(false);
   const [expandedThoughts, setExpandedThoughts] = useState({});
   const [expandedTools, setExpandedTools] = useState({});
   const [copiedKey, setCopiedKey] = useState(null);
@@ -80,92 +79,143 @@ export const OutputPanel = ({
   const tokenPoints = dialogues.map((d) => d.tokens || 100);
   const totalTokens = dialogues.reduce((sum, d) => sum + (d.tokens || 0), 0);
   const totalCost = dialogues.reduce((sum, d) => sum + (d.cost || 0), 0);
-  const totalToolsCount = dialogues.reduce((sum, d) => sum + (d.tools ? Object.keys(d.tools).length : 0), 0);
   const memoryKeysCount = Object.keys(sharedMemory).length;
+  const isCollapsed = panelMode === 'collapsed';
 
   return (
-    <div className={`output-panel-root ${isOpen ? 'open' : 'closed'} ${isExpanded ? 'maximized' : ''}`}>
+    <div className={`output-panel-root mode-${panelMode}`}>
       {/* Panel Top Bar */}
-      <div className="output-panel-header">
-        <div className="header-left">
-          <div className="live-indicator">
-            <span className={`pulse-dot ${isExecuting ? 'running' : 'idle'}`} />
-            <span className="panel-title">BENCHMARK LAB & OBSERVABILITY</span>
-          </div>
-          {scorecard && (
-            <div className="header-score-pill">
-              <span className="grade-badge">{scorecard.grade}</span>
-              <span className="score-val">{scorecard.composite_score}/100</span>
+      {isCollapsed ? (
+        <div
+          className="output-panel-header"
+          onClick={() => onSetPanelMode('standard')}
+          style={{ cursor: 'pointer' }}
+          title="Click to expand results & benchmark panel"
+        >
+          <div className="header-left">
+            <div className="live-indicator">
+              <span className={`pulse-dot ${isExecuting ? 'running' : 'idle'}`} />
+              <span className="panel-title">OUTPUTS & BENCHMARK LAB</span>
             </div>
-          )}
-        </div>
+            {scorecard && (
+              <div className="header-score-pill">
+                <span className="grade-badge">{scorecard.grade}</span>
+                <span className="score-val">{scorecard.composite_score}/100</span>
+              </div>
+            )}
+            <span className="tel-pill" style={{ marginLeft: '4px' }}>
+              💬 {dialogues.length} {dialogues.length === 1 ? 'Output' : 'Outputs'}
+            </span>
+          </div>
 
-        {/* Tab Switcher */}
-        <div className="output-tabs">
-          <button
-            className={`tab-btn ${activeTab === 'dialogues' ? 'active' : ''}`}
-            onClick={() => setActiveTab('dialogues')}
-          >
-            💬 Outputs ({dialogues.length})
-          </button>
-          <button
-            className={`tab-btn ${activeTab === 'scorecard' ? 'active' : ''}`}
-            onClick={() => setActiveTab('scorecard')}
-          >
-            🎯 Scorecard
-          </button>
-          <button
-            className={`tab-btn ${activeTab === 'telemetry' ? 'active' : ''}`}
-            onClick={() => setActiveTab('telemetry')}
-          >
-            ⚡ Waterfall ({dialogues.length})
-          </button>
-          <button
-            className={`tab-btn ${activeTab === 'memory' ? 'active' : ''}`}
-            onClick={() => setActiveTab('memory')}
-          >
-            🌐 Blackboard ({memoryKeysCount})
-          </button>
-          <button
-            className={`tab-btn ${activeTab === 'logs' ? 'active' : ''}`}
-            onClick={() => setActiveTab('logs')}
-          >
-            📜 Logs ({logs.length})
-          </button>
-        </div>
+          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+            {dialogues.length > 0 ? 'Click to inspect completions, thought traces & metrics' : 'Run prompt on canvas to observe stream'}
+          </div>
 
-        {/* Action Controls */}
-        <div className="header-controls">
-          <button
-            className="ctrl-btn"
-            title="Export Benchmark JSON"
-            onClick={() => exportBenchmarkReport('json')}
-          >
-            📥 JSON
-          </button>
-          <button
-            className="ctrl-btn"
-            title="Export Markdown Report"
-            onClick={() => exportBenchmarkReport('md')}
-          >
-            📄 MD Report
-          </button>
-          <button
-            className="ctrl-btn"
-            title="Toggle Fullscreen"
-            onClick={() => setIsExpanded(!isExpanded)}
-          >
-            {isExpanded ? '🗗 Restore' : '🗖 Expand'}
-          </button>
-          <button
-            className="ctrl-btn close-btn"
-            title="Minimize Panel"
-            onClick={onToggle}
-          >
-            ✕
-          </button>
+          <div className="header-controls" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="ctrl-btn"
+              style={{ background: 'rgba(56, 189, 248, 0.15)', color: 'var(--accent-cyan)', borderColor: 'rgba(56, 189, 248, 0.3)' }}
+              onClick={() => onSetPanelMode('standard')}
+              title="Expand to view outputs"
+            >
+              ▲ Open Results
+            </button>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="output-panel-header">
+          <div className="header-left">
+            <div className="live-indicator">
+              <span className={`pulse-dot ${isExecuting ? 'running' : 'idle'}`} />
+              <span className="panel-title">OUTPUTS & BENCHMARK LAB</span>
+            </div>
+            {scorecard && (
+              <div className="header-score-pill">
+                <span className="grade-badge">{scorecard.grade}</span>
+                <span className="score-val">{scorecard.composite_score}/100</span>
+              </div>
+            )}
+          </div>
+
+          {/* Tab Switcher */}
+          <div className="output-tabs">
+            <button
+              className={`tab-btn ${activeTab === 'dialogues' ? 'active' : ''}`}
+              onClick={() => setActiveTab('dialogues')}
+            >
+              💬 Outputs ({dialogues.length})
+            </button>
+            <button
+              className={`tab-btn ${activeTab === 'scorecard' ? 'active' : ''}`}
+              onClick={() => setActiveTab('scorecard')}
+            >
+              🎯 Scorecard
+            </button>
+            <button
+              className={`tab-btn ${activeTab === 'telemetry' ? 'active' : ''}`}
+              onClick={() => setActiveTab('telemetry')}
+            >
+              ⚡ Waterfall ({dialogues.length})
+            </button>
+            <button
+              className={`tab-btn ${activeTab === 'memory' ? 'active' : ''}`}
+              onClick={() => setActiveTab('memory')}
+            >
+              🌐 Blackboard ({memoryKeysCount})
+            </button>
+            <button
+              className={`tab-btn ${activeTab === 'logs' ? 'active' : ''}`}
+              onClick={() => setActiveTab('logs')}
+            >
+              📜 Logs ({logs.length})
+            </button>
+          </div>
+
+          {/* Action Controls */}
+          <div className="header-controls">
+            <button
+              className="ctrl-btn"
+              title="Export Benchmark JSON"
+              onClick={() => exportBenchmarkReport('json')}
+            >
+              📥 JSON
+            </button>
+            <button
+              className="ctrl-btn"
+              title="Export Markdown Report"
+              onClick={() => exportBenchmarkReport('md')}
+            >
+              📄 MD Report
+            </button>
+            {panelMode === 'standard' ? (
+              <button
+                className="ctrl-btn"
+                title="Expand to Fullscreen"
+                onClick={() => onSetPanelMode('fullscreen')}
+              >
+                🗖 Maximize
+              </button>
+            ) : (
+              <button
+                className="ctrl-btn"
+                title="Restore Standard Height"
+                onClick={() => onSetPanelMode('standard')}
+              >
+                🗗 Restore
+              </button>
+            )}
+            <button
+              className="ctrl-btn"
+              title="Minimize to bottom dock"
+              onClick={() => onSetPanelMode('collapsed')}
+              style={{ color: 'var(--text-muted)' }}
+            >
+              ▼ Minimize
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Panel Body */}
       <div className="output-panel-body">

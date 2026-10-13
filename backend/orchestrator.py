@@ -286,8 +286,38 @@ class AgentOrchestrator:
         cap_names = [c if isinstance(c, str) else c.get("name", "") for c in capabilities]
         cap_str = f" [Active Capabilities: {', '.join(cap_names)}]" if cap_names else ""
         task_summary = self.task.strip() or "Standard Agent Workflow"
+        sys_lower = system_prompt.lower()
 
-        if "Developer" in system_prompt or "coding" in system_prompt:
+        if "critic" in sys_lower or "review" in sys_lower:
+            critique = (
+                f"### 🧐 Adversarial Critique & Gap Analysis\n\n"
+                f"**Evaluated Directive:** {task_summary[:70]}...\n\n"
+                f"1. **Strengths:** Clear formulation and targeted goal setting.\n"
+                f"2. **Vulnerabilities / Edge Cases:** Insufficient error handling around unexpected input structures; ambiguity in edge boundary assumptions.\n"
+                f"3. **Optimization Vectors:** Introduce explicit guard assertions, enforce idempotency, and strengthen output verification constraints.\n\n"
+                f"**Recommendation:** Iterate candidate response to incorporate structural guards and clear recovery paths."
+            )
+            return {
+                "thoughts": f"Critically reviewed candidate proposal for '{task_summary[:40]}'.{cap_str} Identified structural edge cases and proposed concrete refinement vectors.",
+                "action": "CRITICAL_REVIEW",
+                "response": critique
+            }, 175, 0.00035
+        elif "evaluator" in sys_lower or "judge" in sys_lower or "qa" in sys_lower or "testing" in sys_lower:
+            test_report = (
+                f"### ⚖️ Benchmark Evaluation & Comparative Verdict\n\n"
+                f"**Target Objective:** {task_summary[:70]}\n"
+                f"- [PASS] Specification Adherence: Core prompt directives satisfied (Score: 92/100).\n"
+                f"- [PASS] Coherence & Depth: Sound logical trajectory without internal contradiction.\n"
+                f"- [PASS] Robustness & Boundary Guard: Resilience against edge cases confirmed.\n"
+                f"- [PASS] Production SLA: Latency and output token budgets respected.\n\n"
+                f"**Verdict:** High-confidence output meeting production quality threshold."
+            )
+            return {
+                "thoughts": f"Evaluated candidate outputs against benchmark rubrics for task.{cap_str} Scored semantic alignment, factual grounding, and execution viability.",
+                "action": "EVALUATE_BENCHMARK",
+                "response": test_report
+            }, 165, 0.00033
+        elif "developer" in sys_lower or "coding" in sys_lower:
             code_snippet = (
                 f"# Implementation for: {task_summary[:60]}\n"
                 f"import time\n"
@@ -305,22 +335,13 @@ class AgentOrchestrator:
                 "action": "CODE_SYNTHESIS",
                 "response": code_snippet
             }, 195, 0.00039
-        elif "QA" in system_prompt or "testing" in system_prompt or "evaluator" in system_prompt.lower():
-            test_report = (
-                f"### 🧪 Automated Test & Verification Report\n\n"
-                f"**Target Objective:** {task_summary[:70]}\n"
-                f"- [PASS] Specification Compliance: All interface schemas verified.\n"
-                f"- [PASS] Boundary Condition Test: Null and empty payloads handled safely.\n"
-                f"- [PASS] Latency SLA Assertion: Execution completed within budget.\n"
-                f"- [PASS] Error Recovery Guard: Zero unhandled runtime exceptions.\n\n"
-                f"**Verdict:** 4/4 assertions passed with 100% test coverage."
-            )
+        elif "approval" in sys_lower or "guard" in sys_lower:
             return {
-                "thoughts": f"Formulated unit tests and edge-case suites for task.{cap_str} Validated input sanitization, performance boundaries, and downstream contract integrity.",
-                "action": "EXECUTE_TEST_SUITE",
-                "response": test_report
-            }, 165, 0.00033
-        elif "Architect" in system_prompt or "research" in system_prompt or "analyst" in system_prompt.lower():
+                "thoughts": f"Conducted policy compliance audit for pipeline objective.{cap_str} Inspected PII, security boundaries, and authorization checkpoints.",
+                "action": "GOVERNANCE_AUDIT",
+                "response": f"Governance Audit for '{task_summary[:50]}': CLEARED.\nRisk Assessment: Low (0.01). Verified compliance with operational standards."
+            }, 120, 0.00024
+        elif "architect" in sys_lower or "research" in sys_lower or "analyst" in sys_lower:
             plan = (
                 f"### 📋 Strategic Decomposition & Architecture Plan\n\n"
                 f"**Core Problem:** {task_summary}\n\n"
@@ -334,17 +355,18 @@ class AgentOrchestrator:
                 "action": "ARCHITECTURAL_BLUEPRINT",
                 "response": plan
             }, 180, 0.00036
-        elif "approval" in system_prompt.lower() or "guard" in system_prompt.lower():
-            return {
-                "thoughts": f"Conducted policy compliance audit for pipeline objective.{cap_str} Inspected PII, security boundaries, and authorization checkpoints.",
-                "action": "GOVERNANCE_AUDIT",
-                "response": f"Governance Audit for '{task_summary[:50]}': CLEARED.\nRisk Assessment: Low (0.01). Verified compliance with operational standards."
-            }, 120, 0.00024
         else:
+            gen_resp = (
+                f"### 🎯 Comprehensive Synthesis\n\n"
+                f"**Directive:** {task_summary}\n\n"
+                f"1. **Analysis**: Evaluated primary constraints and target output objectives.\n"
+                f"2. **Key Deliverable**: High-precision response formulated adhering to all specified parameters.\n"
+                f"3. **Verification**: Verified semantic accuracy, tone, and practical applicability."
+            )
             return {
-                "thoughts": f"Consolidating multi-agent outputs for '{task_summary[:40]}'.{cap_str} Verifying memory convergence and final deliverables.",
-                "action": "CONSOLIDATE_WORKFLOW",
-                "response": f"Successfully completed execution for objective: '{task_summary}'.\nAll upstream agent contributions synthesized and verified."
+                "thoughts": f"Synthesized general-purpose completion for '{task_summary[:40]}'.{cap_str} Addressed user directives directly.",
+                "action": "GENERAL_SYNTHESIS",
+                "response": gen_resp
             }, 150, 0.00030
 
     def calculate_benchmark_scorecard(self):
@@ -422,43 +444,48 @@ class AgentOrchestrator:
         }
 
         if self.mode == 'debate':
-            dev_node = next((n for n in self.nodes.values() if n.get('role') in ('coding', 'developer')), None)
-            qa_node = next((n for n in self.nodes.values() if n.get('role') in ('testing', 'qa', 'evaluator')), None)
+            # Universal consensus & refinement loop: primary proposer vs. critic / reviewer
+            primary_node = next((n for n in self.nodes.values() if n.get('role') in ('general', 'coding', 'developer', 'research')), None)
+            critic_node = next((n for n in self.nodes.values() if n.get('role') in ('critic', 'evaluator', 'judge', 'testing', 'qa')), None)
             
-            if not dev_node or not qa_node:
-                # Fallback to any two nodes
-                node_list = list(self.nodes.values())
-                dev_node = node_list[0] if len(node_list) > 0 else {"id": "1", "name": "Agent_A", "role": "coding", "prompt": "Developer agent"}
-                qa_node = node_list[1] if len(node_list) > 1 else {"id": "2", "name": "Agent_B", "role": "testing", "prompt": "QA Evaluator agent"}
+            node_list = list(self.nodes.values())
+            if not primary_node:
+                primary_node = node_list[0] if len(node_list) > 0 else {"id": "1", "name": "Proposer_Agent", "role": "general", "prompt": "Proposer agent"}
+            if not critic_node:
+                # Pick any node distinct from primary_node, or default
+                distinct_nodes = [n for n in node_list if n.get('id') != primary_node.get('id')]
+                critic_node = distinct_nodes[0] if len(distinct_nodes) > 0 else {"id": "2", "name": "Critic_Agent", "role": "critic", "prompt": "Critic agent"}
 
             context = f"Main Objective: {self.task}"
             for turn in range(1, 4):  # Cap at 3 rounds
-                # Developer Turn
-                yield {"type": "node_start", "nodeId": dev_node['id'], "nodeName": dev_node['name']}
-                dev_prompt = f"{context}\n\nLast Feedback: {self.shared_memory.get('qa_feedback', 'None')}"
+                # Primary Proposer Turn
+                yield {"type": "node_start", "nodeId": primary_node['id'], "nodeName": primary_node['name']}
+                last_fb = self.shared_memory.get('critic_feedback') or self.shared_memory.get('qa_feedback', 'None')
+                proposer_prompt = f"{context}\n\nLast Critic Feedback: {last_fb}"
                 
                 # Check tools
-                tool_results = self.execute_node_tools(dev_node, dev_prompt)
+                tool_results = self.execute_node_tools(primary_node, proposer_prompt)
                 if tool_results:
-                    dev_prompt += f"\nMCP Tool Results: {json.dumps(tool_results)}"
+                    proposer_prompt += f"\nMCP Tool Results: {json.dumps(tool_results)}"
 
                 res, t, c, lat, ttft = self.query_groq(
-                    dev_node.get('prompt', ''),
-                    dev_prompt,
-                    dev_node.get('model'),
-                    dev_node.get('capabilities', [])
+                    primary_node.get('prompt', ''),
+                    proposer_prompt,
+                    primary_node.get('model'),
+                    primary_node.get('capabilities', [])
                 )
+                self.shared_memory['primary_output'] = res.get('response', '')
                 self.shared_memory['developed_code'] = res.get('response', '')
-                self.node_telemetry[dev_node['id']] = {
+                self.node_telemetry[primary_node['id']] = {
                     "tokens": t, "cost": c, "latency_ms": lat, "ttft_ms": ttft, "tools_used": list(tool_results.keys())
                 }
                 
-                self.log_step(dev_node['name'], json.dumps(res), t, c, lat)
+                self.log_step(primary_node['name'], json.dumps(res), t, c, lat)
                 yield {
                     "type": "node_progress", 
-                    "nodeId": dev_node['id'],
-                    "agent": dev_node['name'], 
-                    "role": dev_node.get('role', 'coding'),
+                    "nodeId": primary_node['id'],
+                    "agent": primary_node['name'], 
+                    "role": primary_node.get('role', 'general'),
                     "message": json.dumps(res),
                     "parsed": res,
                     "tokens": t,
@@ -467,44 +494,46 @@ class AgentOrchestrator:
                     "ttft_ms": round(ttft, 2),
                     "tools": tool_results
                 }
-                conversation_turns.append({"agent": dev_node['name'], "output": res, "round": turn})
-                yield {"type": "node_complete", "nodeId": dev_node['id'], "memory": self.shared_memory}
+                conversation_turns.append({"agent": primary_node['name'], "output": res, "round": turn})
+                yield {"type": "node_complete", "nodeId": primary_node['id'], "memory": self.shared_memory}
                 
-                # QA Turn
-                yield {"type": "node_start", "nodeId": qa_node['id'], "nodeName": qa_node['name']}
-                qa_prompt = f"Code/Deliverable to verify:\n{self.shared_memory['developed_code']}"
+                # Critic / Reviewer Turn
+                yield {"type": "node_start", "nodeId": critic_node['id'], "nodeName": critic_node['name']}
+                cur_proposal = self.shared_memory.get('primary_output') or self.shared_memory.get('developed_code', '')
+                critic_prompt = f"Candidate Proposal/Deliverable to verify & critique:\n{cur_proposal}"
                 
-                qa_tools = self.execute_node_tools(qa_node, qa_prompt)
-                if qa_tools:
-                    qa_prompt += f"\nMCP Tool Verifications: {json.dumps(qa_tools)}"
+                critic_tools = self.execute_node_tools(critic_node, critic_prompt)
+                if critic_tools:
+                    critic_prompt += f"\nMCP Tool Verifications: {json.dumps(critic_tools)}"
 
-                res_qa, t2, c2, lat2, ttft2 = self.query_groq(
-                    qa_node.get('prompt', ''),
-                    qa_prompt,
-                    qa_node.get('model'),
-                    qa_node.get('capabilities', [])
+                res_critic, t2, c2, lat2, ttft2 = self.query_groq(
+                    critic_node.get('prompt', ''),
+                    critic_prompt,
+                    critic_node.get('model'),
+                    critic_node.get('capabilities', [])
                 )
-                self.shared_memory['qa_feedback'] = res_qa.get('response', '')
-                self.node_telemetry[qa_node['id']] = {
-                    "tokens": t2, "cost": c2, "latency_ms": lat2, "ttft_ms": ttft2, "tools_used": list(qa_tools.keys())
+                self.shared_memory['critic_feedback'] = res_critic.get('response', '')
+                self.shared_memory['qa_feedback'] = res_critic.get('response', '')
+                self.node_telemetry[critic_node['id']] = {
+                    "tokens": t2, "cost": c2, "latency_ms": lat2, "ttft_ms": ttft2, "tools_used": list(critic_tools.keys())
                 }
                 
-                self.log_step(qa_node['name'], json.dumps(res_qa), t2, c2, lat2)
+                self.log_step(critic_node['name'], json.dumps(res_critic), t2, c2, lat2)
                 yield {
                     "type": "node_progress", 
-                    "nodeId": qa_node['id'],
-                    "agent": qa_node['name'], 
-                    "role": qa_node.get('role', 'testing'),
-                    "message": json.dumps(res_qa),
-                    "parsed": res_qa,
+                    "nodeId": critic_node['id'],
+                    "agent": critic_node['name'], 
+                    "role": critic_node.get('role', 'critic'),
+                    "message": json.dumps(res_critic),
+                    "parsed": res_critic,
                     "tokens": t2,
                     "cost": c2,
                     "latency_ms": round(lat2, 2),
                     "ttft_ms": round(ttft2, 2),
-                    "tools": qa_tools
+                    "tools": critic_tools
                 }
-                conversation_turns.append({"agent": qa_node['name'], "output": res_qa, "round": turn})
-                yield {"type": "node_complete", "nodeId": qa_node['id'], "memory": self.shared_memory}
+                conversation_turns.append({"agent": critic_node['name'], "output": res_critic, "round": turn})
+                yield {"type": "node_complete", "nodeId": critic_node['id'], "memory": self.shared_memory}
 
         else:
             # Topological DAG execution

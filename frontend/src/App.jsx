@@ -5,208 +5,219 @@ import { OutputPanel } from './components/OutputPanel';
 import { HitlInterceptorModal } from './components/HitlInterceptorModal';
 import TutorialModal from './components/TutorialModal';
 
-// High-Impact Multi-Agent Benchmark Presets
+// Universal Multi-Agent Prompt Evaluation & Benchmarking Presets
 const PRESET_TEMPLATES = [
   {
-    id: 'fintech-algo-hitl',
-    name: 'Institutional FinTech & HITL Gate',
-    icon: '📈',
-    description: 'Market research with MCP tools -> Quant modeling -> 🛡️ HITL compliance checkpoint -> Order execution.',
+    id: 'universal-eval',
+    name: 'Universal Prompt Evaluation',
+    icon: '🎯',
+    description: 'Direct prompt execution through a General Agent with empirical LLM-as-a-Judge scorecard evaluation.',
     mode: 'sequential',
-    task: 'Formulate an algorithmic trading strategy for large-cap momentum with a 5% stop-loss threshold and regulatory compliance check.',
+    task: 'Analyze the key arguments for renewable energy adoption and provide a structured 3-point executive summary with potential counterarguments.',
     nodes: [
       {
         id: 'node-in',
-        name: 'Market Signal Trigger',
+        name: 'Input Prompt Trigger',
         role: 'input',
         x: 40,
         y: 120,
         model: 'qwen/qwen3.8-27b',
         temperature: 0.0,
-        prompt: 'Stream market tick data and order parameters.',
+        prompt: 'Stream raw user prompt and parameters.',
         capabilities: []
       },
       {
-        id: 'node-mkt',
-        name: 'Market Intelligence Analyst',
-        role: 'research',
-        x: 280,
-        y: 50,
+        id: 'node-agent',
+        name: 'General AI Agent',
+        role: 'general',
+        x: 340,
+        y: 120,
         model: 'qwen/qwen3.8-27b',
-        temperature: 0.1,
-        prompt: 'Analyze order flow, sector indices, and volatility. Formulate candidate alpha positions.',
+        temperature: 0.2,
+        prompt: 'You are an intelligent, versatile AI assistant. Fulfill the user prompt with clarity, depth, and structured precision.',
         capabilities: []
       },
       {
-        id: 'node-quant',
-        name: 'Quantitative Risk Modeler',
-        role: 'coding',
-        x: 540,
-        y: 50,
-        model: 'qwen/qwen3.8-27b',
-        temperature: 0.0,
-        prompt: 'Calculate Value-at-Risk (VaR), Sharpe ratios, and downside beta using financial tools.',
-        capabilities: []
-      },
-      {
-        id: 'node-hitl',
-        name: 'Risk & Governance Officer',
-        role: 'approval',
-        x: 800,
+        id: 'node-judge',
+        name: 'Judge & Evaluator',
+        role: 'evaluator',
+        x: 680,
         y: 120,
         model: 'qwen/qwen3.8-27b',
         temperature: 0.0,
-        prompt: 'Perform Human-In-The-Loop compliance audit before routing orders to institutional exchange.',
-        capabilities: []
-      },
-      {
-        id: 'node-exec',
-        name: 'Execution & Settlement Engine',
-        role: 'output',
-        x: 1060,
-        y: 120,
-        model: 'qwen/qwen3.8-27b',
-        temperature: 0.0,
-        prompt: 'Commit orders to database and generate execution fill reports.',
+        prompt: 'Act as an empirical judge. Evaluate the response against accuracy, reasoning depth, instruction adherence, and conciseness.',
         capabilities: []
       }
     ],
     connections: [
-      { id: 'c1', fromNode: 'node-in', toNode: 'node-mkt' },
-      { id: 'c2', fromNode: 'node-mkt', toNode: 'node-quant' },
-      { id: 'c3', fromNode: 'node-quant', toNode: 'node-hitl' },
-      { id: 'c4', fromNode: 'node-hitl', toNode: 'node-exec' }
+      { id: 'c1', fromNode: 'node-in', toNode: 'node-agent' },
+      { id: 'c2', fromNode: 'node-agent', toNode: 'node-judge' }
     ]
   },
   {
-    id: 'software-bench',
-    name: 'Autonomous Engineering Benchmark',
-    icon: '⚡',
-    description: 'System architect (CoT) -> Senior developer (Python Sandbox) -> QA & Consensus Evaluator.',
+    id: 'ab-prompt-arena',
+    name: 'A/B Prompt Comparison Arena',
+    icon: '⚔️',
+    description: 'Compare two prompt variants side-by-side (Direct Zero-Shot vs Structured Chain-of-Thought) against identical inputs.',
     mode: 'debate',
-    task: 'Implement a high-throughput async rate-limiting token bucket algorithm with unit test verification and P95 latency benchmarks.',
+    task: 'Write a persuasive, empathetic response to an enterprise customer requesting a contract termination due to budget cuts.',
     nodes: [
       {
         id: 'node-in',
-        name: 'Specification Input',
+        name: 'Prompt Input',
         role: 'input',
         x: 40,
         y: 120,
         model: 'qwen/qwen3.8-27b',
         temperature: 0.0,
-        prompt: 'Ingest architectural performance requirements and latency budgets.',
+        prompt: 'Ingest customer scenario and constraints.',
         capabilities: []
       },
       {
-        id: 'node-spec',
-        name: 'Principal Systems Architect',
-        role: 'research',
-        x: 280,
-        y: 40,
-        model: 'qwen/qwen3.8-27b',
-        temperature: 0.1,
-        prompt: 'Design concurrency schemas, lock-free structures, and interface contracts.',
-        capabilities: []
-      },
-      {
-        id: 'node-dev',
-        name: 'Lead Python Developer',
-        role: 'coding',
-        x: 540,
-        y: 40,
-        model: 'qwen/qwen3.8-27b',
-        temperature: 0.0,
-        prompt: 'Synthesize optimal, production-ready code complying with the specifications.',
-        capabilities: []
-      },
-      {
-        id: 'node-qa',
-        name: 'Benchmark & QA Verifier',
-        role: 'testing',
-        x: 540,
-        y: 220,
-        model: 'qwen/qwen3.8-27b',
-        temperature: 0.0,
-        prompt: 'Execute test suites, stress testing under simulated concurrent load.',
-        capabilities: []
-      },
-      {
-        id: 'node-out',
-        name: 'Release Synthesis',
-        role: 'output',
-        x: 820,
-        y: 120,
-        model: 'qwen/qwen3.8-27b',
-        temperature: 0.0,
-        prompt: 'Compile deployable bundle with test report and benchmark score.',
-        capabilities: []
-      }
-    ],
-    connections: [
-      { id: 'c1', fromNode: 'node-in', toNode: 'node-spec' },
-      { id: 'c2', fromNode: 'node-spec', toNode: 'node-dev' },
-      { id: 'c3', fromNode: 'node-dev', toNode: 'node-qa' },
-      { id: 'c4', fromNode: 'node-qa', toNode: 'node-out' }
-    ]
-  },
-  {
-    id: 'consensus-debate',
-    name: 'Multi-Agent Consensus & Debate',
-    icon: '⚖️',
-    description: 'Adversarial debate between Bull and Bear analysts with an Evaluator synthesizing final consensus.',
-    mode: 'debate',
-    task: 'Debate the monetary policy impact of rate cuts on tech valuations vs inflationary pressures.',
-    nodes: [
-      {
-        id: 'node-in',
-        name: 'Topic Thesis',
-        role: 'input',
-        x: 40,
-        y: 120,
-        model: 'qwen/qwen3.8-27b',
-        temperature: 0.0,
-        prompt: 'Macroeconomic thesis input.',
-        capabilities: []
-      },
-      {
-        id: 'node-bull',
-        name: 'Bullish Macro Strategist',
-        role: 'coding',
+        id: 'node-a',
+        name: 'Agent A (Zero-Shot Direct)',
+        role: 'general',
         x: 340,
         y: 40,
         model: 'qwen/qwen3.8-27b',
-        temperature: 0.3,
-        prompt: 'Argue the expansionary thesis with capital expenditure data and liquidity metrics.',
+        temperature: 0.2,
+        prompt: 'Respond directly and professionally without preliminary thinking steps.',
         capabilities: []
       },
       {
-        id: 'node-bear',
-        name: 'Bearish Risk Assessor',
-        role: 'testing',
+        id: 'node-b',
+        name: 'Agent B (Chain-of-Thought)',
+        role: 'general',
         x: 340,
         y: 220,
         model: 'qwen/qwen3.8-27b',
-        temperature: 0.3,
-        prompt: 'Highlight margin compression, consumer debt thresholds, and valuation multiples.',
-        capabilities: []
+        temperature: 0.2,
+        prompt: 'Decompose the customer situation into root cause, value retention, and alternative solutions before drafting the email.',
+        capabilities: ['cot_reasoning']
       },
       {
-        id: 'node-out',
-        name: 'Consensus Arbiter',
-        role: 'output',
+        id: 'node-judge',
+        name: 'Comparative Judge',
+        role: 'evaluator',
         x: 720,
         y: 120,
         model: 'qwen/qwen3.8-27b',
         temperature: 0.0,
-        prompt: 'Evaluate debate arguments and synthesize balanced consensus weighting.',
+        prompt: 'Compare both outputs. Evaluate tone, de-escalation effectiveness, and professional polish.',
         capabilities: []
       }
     ],
     connections: [
-      { id: 'c1', fromNode: 'node-in', toNode: 'node-bull' },
-      { id: 'c2', fromNode: 'node-in', toNode: 'node-bear' },
-      { id: 'c3', fromNode: 'node-bull', toNode: 'node-out' },
-      { id: 'c4', fromNode: 'node-bear', toNode: 'node-out' }
+      { id: 'c1', fromNode: 'node-in', toNode: 'node-a' },
+      { id: 'c2', fromNode: 'node-in', toNode: 'node-b' },
+      { id: 'c3', fromNode: 'node-a', toNode: 'node-judge' },
+      { id: 'c4', fromNode: 'node-b', toNode: 'node-judge' }
+    ]
+  },
+  {
+    id: 'multistep-refiner',
+    name: 'Collaborative Drafter & Critic',
+    icon: '🔄',
+    description: 'Generator drafts candidate solution -> Critic identifies gaps -> Polisher finalizes.',
+    mode: 'sequential',
+    task: 'Design an asynchronous rate-limiter algorithm with sliding window log logic, and write complete Python unit tests.',
+    nodes: [
+      {
+        id: 'node-in',
+        name: 'Task Directive',
+        role: 'input',
+        x: 40,
+        y: 120,
+        model: 'qwen/qwen3.8-27b',
+        temperature: 0.0,
+        prompt: 'Ingest technical task requirements.',
+        capabilities: []
+      },
+      {
+        id: 'node-draft',
+        name: 'Drafting Agent',
+        role: 'general',
+        x: 280,
+        y: 120,
+        model: 'qwen/qwen3.8-27b',
+        temperature: 0.1,
+        prompt: 'Draft an initial comprehensive architecture proposal meeting all requirements.',
+        capabilities: []
+      },
+      {
+        id: 'node-critic',
+        name: 'Critic & Reviewer',
+        role: 'critic',
+        x: 540,
+        y: 120,
+        model: 'qwen/qwen3.8-27b',
+        temperature: 0.1,
+        prompt: 'Critically analyze the draft for edge cases, performance bottlenecks, and missing test assertions.',
+        capabilities: ['self_reflection']
+      },
+      {
+        id: 'node-polish',
+        name: 'Final Polisher',
+        role: 'general',
+        x: 800,
+        y: 120,
+        model: 'qwen/qwen3.8-27b',
+        temperature: 0.0,
+        prompt: 'Incorporate the critic feedback into a polished, production-ready final deliverable.',
+        capabilities: []
+      }
+    ],
+    connections: [
+      { id: 'c1', fromNode: 'node-in', toNode: 'node-draft' },
+      { id: 'c2', fromNode: 'node-draft', toNode: 'node-critic' },
+      { id: 'c3', fromNode: 'node-critic', toNode: 'node-polish' }
+    ]
+  },
+  {
+    id: 'tool-specialist',
+    name: 'Tool-Augmented Research Agent',
+    icon: '🛠️',
+    description: 'General agent equipped with Model Context Protocol (MCP) Live Search and Code Execution tools.',
+    mode: 'sequential',
+    task: 'Investigate recent AI evaluation benchmarks, run statistical variance calculations, and synthesize an empirical report.',
+    nodes: [
+      {
+        id: 'node-in',
+        name: 'Research Objective',
+        role: 'input',
+        x: 40,
+        y: 120,
+        model: 'qwen/qwen3.8-27b',
+        temperature: 0.0,
+        prompt: 'Ingest research parameters and query constraints.',
+        capabilities: []
+      },
+      {
+        id: 'node-research',
+        name: 'Research & Tool Agent',
+        role: 'general',
+        x: 340,
+        y: 120,
+        model: 'qwen/qwen3.8-27b',
+        temperature: 0.1,
+        prompt: 'Execute tools to gather data and perform calculations to fulfill the prompt.',
+        capabilities: ['tool_web_search', 'tool_code_exec']
+      },
+      {
+        id: 'node-synth',
+        name: 'Synthesis Agent',
+        role: 'output',
+        x: 680,
+        y: 120,
+        model: 'qwen/qwen3.8-27b',
+        temperature: 0.0,
+        prompt: 'Synthesize the tool findings into a coherent, executive summary.',
+        capabilities: []
+      }
+    ],
+    connections: [
+      { id: 'c1', fromNode: 'node-in', toNode: 'node-research' },
+      { id: 'c2', fromNode: 'node-research', toNode: 'node-synth' }
     ]
   }
 ];
@@ -219,8 +230,8 @@ export default function App() {
   const [selectedMode, setSelectedMode] = useState(PRESET_TEMPLATES[0].mode);
   const [taskPrompt, setTaskPrompt] = useState(PRESET_TEMPLATES[0].task);
 
-  // Panels visibility
-  const [isOutputPanelOpen, setIsOutputPanelOpen] = useState(false);
+  // Panels visibility mode: 'collapsed' | 'standard' | 'fullscreen'
+  const [panelMode, setPanelMode] = useState('collapsed');
   const [showTutorial, setShowTutorial] = useState(false);
 
   // Key state variables
@@ -264,24 +275,32 @@ export default function App() {
   };
 
   // Add custom node to canvas
-  const handleAddCustomNode = (role = 'coding', x = 400, y = 150) => {
+  const handleAddCustomNode = (role = 'general', x = 400, y = 150) => {
     const count = nodes.length + 1;
     let name = `Agent_${count}`;
-    let prompt = 'You are an autonomous AI agent.';
+    let prompt = 'You are an autonomous AI agent. Follow prompt instructions diligently and provide clear, high-quality responses.';
     let caps = [];
 
     if (role === 'approval') {
       name = `HITL_Gate_${count}`;
-      prompt = 'Perform human compliance review.';
+      prompt = 'Perform human compliance review and safety verification before proceeding.';
       caps = [];
     } else if (role === 'evaluator') {
-      name = `Evaluator_${count}`;
-      prompt = 'Evaluate downstream outputs against benchmarks.';
+      name = `Judge_${count}`;
+      prompt = 'Evaluate candidate outputs against evaluation rubrics and assign objective quality scores.';
       caps = [];
+    } else if (role === 'critic') {
+      name = `Critic_${count}`;
+      prompt = 'Critically review prior output for accuracy, edge cases, hallucination, and quality improvements.';
+      caps = ['self_reflection'];
     } else if (role === 'research') {
-      name = `Analyst_${count}`;
-      prompt = 'Retrieve market and technical intelligence.';
-      caps = [];
+      name = `Research_Agent_${count}`;
+      prompt = 'Retrieve external data, analyze documents, and synthesize domain knowledge.';
+      caps = ['tool_web_search'];
+    } else if (role === 'coding') {
+      name = `Code_Agent_${count}`;
+      prompt = 'Write clean, robust, and well-tested code.';
+      caps = ['tool_code_exec'];
     }
 
     const newNode = {
@@ -339,7 +358,7 @@ export default function App() {
   const handleRunWorkflow = async () => {
     handleResetWorkflow();
     setExecutionState('running');
-    setIsOutputPanelOpen(true);
+    setPanelMode('standard');
     addLog('System', `Initiating Multi-Agent Benchmark run [Topology: ${selectedMode}, Mode: ${securityMode}]`);
 
     const runId = Math.random().toString(36).substring(2, 10);
@@ -586,8 +605,8 @@ export default function App() {
             🎓 Tutorial
           </button>
           <button
-            className={`panel-toggle-btn ${isOutputPanelOpen ? 'active' : ''}`}
-            onClick={() => setIsOutputPanelOpen(!isOutputPanelOpen)}
+            className={`panel-toggle-btn ${panelMode !== 'collapsed' ? 'active' : ''}`}
+            onClick={() => setPanelMode((prev) => (prev === 'collapsed' ? 'standard' : 'collapsed'))}
             title="Toggle Benchmark Output Panel"
           >
             📊 Benchmark Lab
@@ -653,8 +672,8 @@ export default function App() {
         dialogues={dialogues}
         telemetry={telemetry}
         isExecuting={executionState === 'running'}
-        isOpen={isOutputPanelOpen}
-        onToggle={() => setIsOutputPanelOpen(!isOutputPanelOpen)}
+        panelMode={panelMode}
+        onSetPanelMode={setPanelMode}
         onClear={() => setLogs([])}
       />
 
