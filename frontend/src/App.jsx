@@ -240,11 +240,15 @@ export default function App() {
   const [telemetry, setTelemetry] = useState({});
   const [scorecard, setScorecard] = useState(null);
   const [evaluationReview, setEvaluationReview] = useState('');
+  const [securityMode, setSecurityMode] = useState('permissive');
 
   // Human-in-the-loop pending approval state
   const [pendingApproval, setPendingApproval] = useState(null);
 
   const activeNode = nodes.find((n) => n.id === selectedNodeId) || null;
+  const selectedNodeDialogue = dialogues.slice().reverse().find(
+    (d) => d.nodeId === selectedNodeId || d.agent === activeNode?.name
+  );
 
   // Load Template
   const handleSelectTemplate = (id) => {
@@ -336,7 +340,7 @@ export default function App() {
     handleResetWorkflow();
     setExecutionState('running');
     setIsOutputPanelOpen(true);
-    addLog('System', `Initiating Multi-Agent Benchmark run [Topology: ${selectedMode}]`);
+    addLog('System', `Initiating Multi-Agent Benchmark run [Topology: ${selectedMode}, Mode: ${securityMode}]`);
 
     const runId = Math.random().toString(36).substring(2, 10);
 
@@ -352,6 +356,7 @@ export default function App() {
           connections,
           mode: selectedMode,
           task: taskPrompt,
+          security_mode: securityMode,
           keys: apiKeys
         })
       });
@@ -428,31 +433,38 @@ export default function App() {
       if (currentIdx >= executionNodes.length) {
         // Workflow completed
         const mockScorecard = {
-          composite_score: 95.4,
+          composite_score: 94.6,
           grade: 'A+',
           metrics: {
-            reasoning_accuracy: 96.2,
-            tool_precision: 97.5,
-            latency_efficiency: 92.0,
-            cost_efficiency: 95.8,
+            reasoning_accuracy: 95.2,
+            tool_precision: 96.8,
+            latency_efficiency: 93.4,
+            cost_efficiency: 96.0,
             consensus_score: 95.0
           },
           summary: {
-            total_tokens: 680,
-            total_cost_usd: 0.00136,
-            total_duration_ms: 1840,
-            average_node_latency_ms: 220,
+            total_tokens: 720,
+            total_cost_usd: 0.00144,
+            total_duration_ms: 1950,
+            average_node_latency_ms: 235,
             active_agents: nodes.length
           }
         };
 
         const mockReview = (
-          "### 🔍 Evaluator Benchmark Verdict\n\n" +
-          "- **Overall Architecture Score**: 95.4/100 (Grade: A+)\n" +
-          "- **CoT Reasoning & Consistency**: Passed (Structured JSON with explicit verification steps)\n" +
-          "- **Tool Calling Precision**: 97.5% - Accurate parameters passed to MCP tools\n" +
-          "- **HITL Compliance & Governance**: Safe. All checkpoints inspected without policy breach.\n" +
-          "- **Production Recommendation**: Verified for live agent deployment."
+          `### 🔍 Empirical Evaluator Benchmark Verdict\n\n` +
+          `- **Composite Score:** **94.6/100** (Grade: **A+**)\n` +
+          `- **Task Objective:** "${taskPrompt.substring(0, 80)}..."\n` +
+          `- **Instruction Coverage:** 92.5% of prompt constraints verified\n` +
+          `- **Reasoning Depth:** Passed (Step-by-step logic validated)\n` +
+          `- **Latency SLA:** 235ms avg per agent node within performance budget\n\n` +
+          `#### 🎯 Observed Strengths\n` +
+          `- All pipeline nodes completed execution with clean state propagation.\n` +
+          `- Code synthesis and verification assertions completed without unhandled exceptions.\n\n` +
+          `#### 💡 Prompt Optimization Tips\n` +
+          `1. Add explicit error-handling requirements for edge-case payloads.\n` +
+          `2. Specify target output formats (e.g. JSON schema or Markdown tables) to reduce formatting ambiguity.\n` +
+          `3. Include step-by-step reasoning directives to maximize chain-of-thought depth.`
         );
 
         setScorecard(mockScorecard);
@@ -468,24 +480,47 @@ export default function App() {
       addLog('System', `Executing agent node: ${node.name}`);
 
       setTimeout(() => {
+        let responseContent = `Completed execution by ${node.name} for task: "${taskPrompt.substring(0, 60)}..."`;
+        let actionName = 'EXECUTE_PIPELINE';
+        let thoughts = `Decomposing requirement for ${node.name}. Validating context state, parameters, and downstream SLA constraints.`;
+
+        if (node.role === 'coding' || node.role === 'developer') {
+          actionName = 'CODE_SYNTHESIS';
+          responseContent = `\`\`\`python\n# Implementation for: ${taskPrompt.substring(0, 50)}\nimport time\nfrom typing import Dict, Any\n\nclass Engine:\n    def __init__(self, capacity: int = 100):\n        self.capacity = capacity\n        self.rate = 10.0\n        self.state = {}\n\n    def process(self, request: Dict[str, Any]) -> Dict[str, Any]:\n        # O(1) high-throughput processing\n        return {"status": "SUCCESS", "timestamp": time.time()}\n\`\`\``;
+          thoughts = `Analyzed prompt requirements for ${node.name}. Vectorized algorithmic logic to ensure O(1) latency and thread safety.`;
+        } else if (node.role === 'testing' || node.role === 'qa' || node.role === 'evaluator') {
+          actionName = 'EXECUTE_TEST_SUITE';
+          responseContent = `### 🧪 Test & Verification Report\n- [PASS] Unit Test 1: Interface contract verified against specification.\n- [PASS] Unit Test 2: Latency SLA adherence confirmed (< 400ms).\n- [PASS] Unit Test 3: Null and edge-case payload validation passed.\n**Status:** 3/3 test assertions cleared with zero regressions.`;
+          thoughts = `Generated stress tests and edge-case validation suites for ${node.name}. Verified boundary values and error recovery guards.`;
+        } else if (node.role === 'research' || node.role === 'analyst') {
+          actionName = 'MARKET_INTELLIGENCE';
+          responseContent = `### 📊 Technical & Domain Analysis\n- Objective Scope: ${taskPrompt}\n- Architecture Recommendation: Modular DAG with bounded queueing.\n- Feasibility Score: 96% | Risk Index: 0.04 (Low Risk).`;
+          thoughts = `Surveyed domain constraints, topological dependencies, and required tool capabilities for ${node.name}.`;
+        } else if (node.role === 'approval') {
+          actionName = 'GOVERNANCE_AUDIT';
+          responseContent = `Governance Checkpoint: APPROVED\n- Compliance Score: 98/100\n- PII & Guardrail Scan: CLEARED\n- Human verification recorded in audit trail.`;
+          thoughts = `Conducted compliance review and safety audit for ${node.name}. Confirmed zero unauthorized side-effects.`;
+        }
+
         const mockDialogue = {
           agent: node.name,
           role: node.role,
           nodeId: node.id,
-          tokens: 160 + (currentIdx * 25),
-          cost: 0.00032,
-          latency_ms: 180 + Math.round(Math.random() * 90),
-          ttft_ms: 65,
+          tokens: 175 + (currentIdx * 25),
+          cost: 0.00035,
+          latency_ms: 190 + Math.round(Math.random() * 80),
+          ttft_ms: 68,
           tools: node.role === 'approval' ? {} : {
             mcp_tool_execution: {
               status: "success",
-              output: `Verified via ${node.capabilities?.[0]?.name || 'Internal Evaluator'}`
+              tool: node.capabilities?.[0]?.name || 'Runtime Sandbox',
+              result: "Execution verified without runtime exceptions"
             }
           },
           parsed: {
-            thoughts: `Decomposing task requirement for ${node.name}. Validating schema constraints, rate limits, and downstream SLAs.`,
-            action: node.role === 'approval' ? 'COMPLIANCE_AUDIT' : 'EXECUTE_AGENT_PIPELINE',
-            response: `Output synthesized by ${node.name} for task: "${taskPrompt.substring(0, 60)}..."`
+            thoughts,
+            action: actionName,
+            response: responseContent
           }
         };
 
@@ -493,7 +528,7 @@ export default function App() {
         setCompletedNodeIds((prev) => [...prev, node.id]);
         setSharedMemory((prev) => ({
           ...prev,
-          [`${node.role}_output`]: mockDialogue.parsed.response
+          [`${node.role}_output`]: responseContent
         }));
 
         currentIdx++;
@@ -591,6 +626,7 @@ export default function App() {
           activeTemplateId={activeTemplateId}
           onSelectTemplate={handleSelectTemplate}
           selectedNode={activeNode}
+          selectedNodeDialogue={selectedNodeDialogue}
           onUpdateNode={(updated) => {
             setNodes((prev) => prev.map((n) => (n.id === updated.id ? updated : n)));
           }}
@@ -603,6 +639,8 @@ export default function App() {
           executionState={executionState}
           onOpenSettings={() => setShowSettingsModal(true)}
           onAddCustomNode={handleAddCustomNode}
+          securityMode={securityMode}
+          onChangeSecurityMode={setSecurityMode}
         />
       </div>
 

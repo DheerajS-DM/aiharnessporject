@@ -82,15 +82,17 @@ def run_workflow():
     connections = config.get("connections", [])
     mode = config.get("mode", "sequential")
     task = config.get("task", "")
+    security_mode = config.get("security_mode", "strict")
     
-    # Anti-Prompt Injection Validation
+    # Anti-Prompt Injection Validation (Enforced in 'strict' mode; audited in 'permissive'/'red_team' mode)
     forbidden_phrases = ["ignore previous instructions", "system prompt", "bypass", "override", "you are no longer", "forget all instructions"]
     task_lower = task.lower()
-    for phrase in forbidden_phrases:
-        if phrase in task_lower:
-            response = jsonify({"error": "Security Error: Malicious prompt pattern detected."})
-            response.status_code = 400
-            return add_cors_headers(response)
+    security_flagged = [phrase for phrase in forbidden_phrases if phrase in task_lower]
+    
+    if security_mode == "strict" and security_flagged:
+        response = jsonify({"error": f"Security Error: Malicious prompt pattern detected ({', '.join(security_flagged)})."})
+        response.status_code = 400
+        return add_cors_headers(response)
 
     keys = config.get("keys", {})
     run_id = config.get("run_id")
@@ -101,7 +103,9 @@ def run_workflow():
         mode=mode,
         task=task,
         keys=keys,
-        run_id=run_id
+        run_id=run_id,
+        security_mode=security_mode,
+        security_flagged=security_flagged
     )
 
     def generate():

@@ -13,7 +13,7 @@ export const OutputPanel = ({
   onToggle = () => {},
   onClear = () => {}
 }) => {
-  const [activeTab, setActiveTab] = useState('scorecard');
+  const [activeTab, setActiveTab] = useState('dialogues');
   const [isExpanded, setIsExpanded] = useState(false);
   const [expandedThoughts, setExpandedThoughts] = useState({});
   const [expandedTools, setExpandedTools] = useState({});
@@ -80,6 +80,8 @@ export const OutputPanel = ({
   const tokenPoints = dialogues.map((d) => d.tokens || 100);
   const totalTokens = dialogues.reduce((sum, d) => sum + (d.tokens || 0), 0);
   const totalCost = dialogues.reduce((sum, d) => sum + (d.cost || 0), 0);
+  const totalToolsCount = dialogues.reduce((sum, d) => sum + (d.tools ? Object.keys(d.tools).length : 0), 0);
+  const memoryKeysCount = Object.keys(sharedMemory).length;
 
   return (
     <div className={`output-panel-root ${isOpen ? 'open' : 'closed'} ${isExpanded ? 'maximized' : ''}`}>
@@ -101,10 +103,28 @@ export const OutputPanel = ({
         {/* Tab Switcher */}
         <div className="output-tabs">
           <button
+            className={`tab-btn ${activeTab === 'dialogues' ? 'active' : ''}`}
+            onClick={() => setActiveTab('dialogues')}
+          >
+            💬 Outputs ({dialogues.length})
+          </button>
+          <button
             className={`tab-btn ${activeTab === 'scorecard' ? 'active' : ''}`}
             onClick={() => setActiveTab('scorecard')}
           >
             🎯 Scorecard
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'telemetry' ? 'active' : ''}`}
+            onClick={() => setActiveTab('telemetry')}
+          >
+            ⚡ Waterfall ({dialogues.length})
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'memory' ? 'active' : ''}`}
+            onClick={() => setActiveTab('memory')}
+          >
+            🌐 Blackboard ({memoryKeysCount})
           </button>
           <button
             className={`tab-btn ${activeTab === 'logs' ? 'active' : ''}`}
@@ -149,7 +169,99 @@ export const OutputPanel = ({
 
       {/* Panel Body */}
       <div className="output-panel-body">
-        {/* TAB 1: BENCHMARK SCORECARD */}
+        {/* TAB 1: AGENT DIALOGUES & OUTPUTS */}
+        {activeTab === 'dialogues' && (
+          <div className="tab-pane dialogues-pane">
+            <div className="dialogue-list">
+              {dialogues.length === 0 ? (
+                <div className="verdict-placeholder" style={{ padding: '30px 20px', textAlign: 'center' }}>
+                  {isExecuting
+                    ? '⚡ Agent pipeline running... Generated outputs will stream here in real-time.'
+                    : '▶ No prompt outputs yet. Click "Run Benchmark" on the left sidebar to execute and observe AI outputs.'}
+                </div>
+              ) : (
+                dialogues.map((d, idx) => {
+                  const parsed = d.parsed || {};
+                  const responseText = parsed.response || (typeof d.message === 'string' ? d.message : JSON.stringify(d.message, null, 2));
+                  const thoughtsText = parsed.thoughts || '';
+                  const actionText = parsed.action || '';
+                  const toolsObj = d.tools || {};
+                  const hasTools = Object.keys(toolsObj).length > 0;
+                  const isThoughtOpen = !!expandedThoughts[idx];
+                  const isToolOpen = !!expandedTools[idx];
+
+                  return (
+                    <div key={idx} className="dialogue-bubble">
+                      <div className="bubble-header">
+                        <div className="agent-identity">
+                          <span className={`status-indicator done`} />
+                          <span className="agent-name">{d.agent || `Agent #${idx + 1}`}</span>
+                          <span className={`role-badge role-${d.role}`}>{d.role}</span>
+                          {actionText && <span className="action-badge">{actionText}</span>}
+                        </div>
+                        <div className="bubble-telemetry">
+                          <span className="tel-pill">{d.tokens || 0} tok</span>
+                          <span className="tel-pill">{d.latency_ms || 0}ms</span>
+                          {d.ttft_ms ? <span className="tel-pill">TTFT: {d.ttft_ms}ms</span> : null}
+                          <button
+                            className="copy-mini-btn"
+                            onClick={() => copyToClipboard(responseText, `resp-${idx}`)}
+                            title="Copy response text"
+                          >
+                            {copiedKey === `resp-${idx}` ? '✓ Copied' : '📋 Copy'}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Thoughts / Chain of Thought Drawer */}
+                      {thoughtsText && (
+                        <div className="thought-drawer">
+                          <button
+                            className="thought-toggle-btn"
+                            onClick={() => toggleThought(idx)}
+                          >
+                            <span>🧠 Step-by-Step Chain of Thought ({thoughtsText.length} chars)</span>
+                            <span>{isThoughtOpen ? '▲ Hide Trace' : '▼ Reveal Trace'}</span>
+                          </button>
+                          {isThoughtOpen && (
+                            <div className="thought-content">
+                              {thoughtsText}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Tool Invocations Drawer */}
+                      {hasTools && (
+                        <div className="tool-drawer">
+                          <button
+                            className="tool-toggle-btn"
+                            onClick={() => toggleTool(idx)}
+                          >
+                            <span>🛠️ MCP Tool Execution ({Object.keys(toolsObj).join(', ')})</span>
+                            <span>{isToolOpen ? '▲ Hide Tool Details' : '▼ View Payload'}</span>
+                          </button>
+                          {isToolOpen && (
+                            <pre className="tool-json-output">
+                              {JSON.stringify(toolsObj, null, 2)}
+                            </pre>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Primary Output Display */}
+                      <div className="bubble-response">
+                        <pre className="response-pre">{responseText}</pre>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: BENCHMARK SCORECARD & EVALUATOR */}
         {activeTab === 'scorecard' && (
           <div className="tab-pane scorecard-pane">
             <div className="scorecard-top-grid">
@@ -190,7 +302,7 @@ export const OutputPanel = ({
             <div className="evaluator-verdict-box">
               <div className="verdict-header">
                 <span className="verdict-icon">🔍</span>
-                <h4>Gemini Evaluator Agent Review</h4>
+                <h4>LLM-as-a-Judge Empirical Assessment</h4>
               </div>
               <div className="verdict-content">
                 {evaluationReview ? (
@@ -198,8 +310,8 @@ export const OutputPanel = ({
                 ) : (
                   <div className="verdict-placeholder">
                     {isExecuting
-                      ? 'Agents executing DAG pipeline... Evaluator will synthesize benchmarks upon workflow completion.'
-                      : 'Run a workflow on the canvas to generate benchmark evaluation.'}
+                      ? 'Agents executing pipeline... Judge will synthesize benchmark review upon workflow completion.'
+                      : 'Run a prompt on the canvas to generate benchmark evaluation.'}
                   </div>
                 )}
               </div>
@@ -207,7 +319,94 @@ export const OutputPanel = ({
           </div>
         )}
 
+        {/* TAB 3: TELEMETRY & LATENCY WATERFALL */}
+        {activeTab === 'telemetry' && (
+          <div className="tab-pane telemetry-pane">
+            <div className="telemetry-grid">
+              <div className="telemetry-card">
+                <h4>Latency Waterfall (TTFT vs Generation Duration)</h4>
+                <LatencyWaterfall data={waterfallData} />
+              </div>
 
+              <div className="telemetry-card">
+                <h4>Resource Utilization & Token Velocity</h4>
+                <div className="token-sparkline-box">
+                  <div className="spark-stat">
+                    <span className="spark-label">Total Tokens Consumed</span>
+                    <span className="spark-val">{totalTokens} tok</span>
+                  </div>
+                  <MiniSparkline points={tokenPoints} />
+                </div>
+                <table className="telemetry-table">
+                  <thead>
+                    <tr>
+                      <th>Agent Node</th>
+                      <th>Tokens</th>
+                      <th>Latency</th>
+                      <th>Cost Est.</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dialogues.map((d, i) => (
+                      <tr key={i}>
+                        <td style={{ color: 'var(--text-primary)' }}>{d.agent}</td>
+                        <td>{d.tokens || 0}</td>
+                        <td>{d.latency_ms || 0}ms</td>
+                        <td>${(d.cost || 0).toFixed(5)}</td>
+                      </tr>
+                    ))}
+                    {dialogues.length === 0 && (
+                      <tr>
+                        <td colSpan={4} style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '16px' }}>
+                          No telemetry gathered yet.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: SHARED MEMORY / BLACKBOARD */}
+        {activeTab === 'memory' && (
+          <div className="tab-pane memory-pane">
+            <div className="memory-header-row">
+              <h4>Shared Blackboard State Bus ({memoryKeysCount} keys)</h4>
+              <button
+                className="copy-btn"
+                onClick={() => copyToClipboard(sharedMemory, 'all-mem')}
+              >
+                {copiedKey === 'all-mem' ? '✓ Copied All State' : '📋 Copy All JSON'}
+              </button>
+            </div>
+            <div className="memory-keys-list">
+              {memoryKeysCount === 0 ? (
+                <div className="verdict-placeholder" style={{ padding: '24px', textAlign: 'center' }}>
+                  No variables written to blackboard yet. As agents execute, downstream outputs will appear here.
+                </div>
+              ) : (
+                Object.entries(sharedMemory).map(([k, val]) => (
+                  <div key={k} className="memory-item">
+                    <div className="mem-key-header">
+                      <span className="mem-key-name">{k}</span>
+                      <button
+                        className="copy-mini-btn"
+                        onClick={() => copyToClipboard(val, `mem-${k}`)}
+                      >
+                        {copiedKey === `mem-${k}` ? '✓ Copied' : '📋 Copy'}
+                      </button>
+                    </div>
+                    <pre className="mem-value-pre">
+                      {typeof val === 'string' ? val : JSON.stringify(val, null, 2)}
+                    </pre>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
 
         {/* TAB 5: SYSTEM LOGS */}
         {activeTab === 'logs' && (
@@ -224,6 +423,11 @@ export const OutputPanel = ({
                   <span className="log-msg">{log.message}</span>
                 </div>
               ))}
+              {logs.length === 0 && (
+                <div style={{ color: 'var(--text-muted)', fontStyle: 'italic', padding: '10px' }}>
+                  No system logs recorded yet.
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -231,3 +435,4 @@ export const OutputPanel = ({
     </div>
   );
 };
+

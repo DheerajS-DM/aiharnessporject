@@ -5,6 +5,7 @@ export default function Sidebar({
   activeTemplateId,
   onSelectTemplate,
   selectedNode,
+  selectedNodeDialogue,
   onUpdateNode,
   selectedMode,
   onSelectMode,
@@ -14,7 +15,9 @@ export default function Sidebar({
   onResetWorkflow,
   executionState,
   onOpenSettings,
-  onAddCustomNode
+  onAddCustomNode,
+  securityMode = 'permissive',
+  onChangeSecurityMode = () => {}
 }) {
   const modes = [
     { id: 'sequential', name: 'Sequential DAG', desc: 'Topological execution passing context downstream.' },
@@ -95,6 +98,44 @@ export default function Sidebar({
             disabled={executionState === 'running'}
             rows={3}
           />
+        </div>
+
+        {/* Security & Evaluation Mode Selector */}
+        <div className="form-group" style={{ marginTop: '8px', marginBottom: '8px' }}>
+          <div className="form-label-row">
+            <span className="form-label">Evaluation Mode</span>
+            <span className="mono-val" style={{ color: securityMode === 'permissive' ? 'var(--accent-emerald)' : 'var(--accent-amber)' }}>
+              {securityMode === 'permissive' ? '🔓 Permissive (Prompt Lab)' : '🛡️ Strict Guardrails'}
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
+            <button
+              type="button"
+              className={`quick-add-btn ${securityMode === 'permissive' ? 'hitl-btn-add' : ''}`}
+              style={{
+                flex: 1,
+                borderColor: securityMode === 'permissive' ? 'var(--accent-emerald)' : 'var(--border-subtle)',
+                color: securityMode === 'permissive' ? 'var(--accent-emerald)' : 'var(--text-muted)'
+              }}
+              onClick={() => onChangeSecurityMode('permissive')}
+              title="Permits unrestricted prompt testing, system prompts, meta-prompts, and red-teaming."
+            >
+              🔓 Permissive (Eval)
+            </button>
+            <button
+              type="button"
+              className={`quick-add-btn ${securityMode === 'strict' ? 'hitl-btn-add' : ''}`}
+              style={{
+                flex: 1,
+                borderColor: securityMode === 'strict' ? 'var(--accent-amber)' : 'var(--border-subtle)',
+                color: securityMode === 'strict' ? 'var(--accent-amber)' : 'var(--text-muted)'
+              }}
+              onClick={() => onChangeSecurityMode('strict')}
+              title="Blocks prompt injection keywords to test defensive filtering."
+            >
+              🛡️ Strict Guard
+            </button>
+          </div>
         </div>
 
         <div className="sidebar-action-buttons">
@@ -253,9 +294,44 @@ export default function Sidebar({
                 value={selectedNode.prompt || ''}
                 onChange={(e) => onUpdateNode({ ...selectedNode, prompt: e.target.value })}
                 disabled={executionState === 'running'}
-                rows={4}
+                rows={3}
               />
             </div>
+
+            {/* Node Output Completion Display */}
+            {selectedNodeDialogue && (
+              <div className="inspector-output-card" style={{ marginTop: '12px', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--accent-cyan)' }}>
+                    ⚡ LATEST NODE OUTPUT
+                  </span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--text-muted)' }}>
+                    {selectedNodeDialogue.tokens || 0} tok | {selectedNodeDialogue.latency_ms || 0}ms
+                  </span>
+                </div>
+                <div style={{ maxHeight: '160px', overflowY: 'auto', background: 'rgba(0,0,0,0.4)', borderRadius: '4px', padding: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <pre style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', whiteSpace: 'pre-wrap', color: 'var(--text-primary)', margin: 0 }}>
+                    {selectedNodeDialogue.parsed?.response || (typeof selectedNodeDialogue.message === 'string' ? selectedNodeDialogue.message : JSON.stringify(selectedNodeDialogue.message, null, 2))}
+                  </pre>
+                </div>
+                {selectedNodeDialogue.parsed?.thoughts && (
+                  <details style={{ marginTop: '6px', fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                    <summary style={{ cursor: 'pointer', color: 'var(--text-secondary)' }}>🧠 Chain of Thought Trace</summary>
+                    <p style={{ marginTop: '4px', padding: '6px', background: 'rgba(0,0,0,0.2)', borderRadius: '4px', whiteSpace: 'pre-wrap' }}>
+                      {selectedNodeDialogue.parsed.thoughts}
+                    </p>
+                  </details>
+                )}
+                {selectedNodeDialogue.tools && Object.keys(selectedNodeDialogue.tools).length > 0 && (
+                  <details style={{ marginTop: '4px', fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                    <summary style={{ cursor: 'pointer', color: 'var(--accent-cyan)' }}>🛠️ Tool Execution</summary>
+                    <pre style={{ marginTop: '4px', padding: '6px', background: 'rgba(0,0,0,0.3)', borderRadius: '4px', fontFamily: 'var(--font-mono)', fontSize: '0.6rem' }}>
+                      {JSON.stringify(selectedNodeDialogue.tools, null, 2)}
+                    </pre>
+                  </details>
+                )}
+              </div>
+            )}
           </div>
         ) : (
           <div className="inspector-empty">
